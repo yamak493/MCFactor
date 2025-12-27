@@ -1,0 +1,33 @@
+# French Language File
+command:
+  register:
+    invalid-appkey: "&cFormat de clé d'application invalide. Utilisez un code de 6 caractères."
+    already-linked: "&cVotre compte est déjà lié. Utilisez /2fa pour dissocier d'abord."
+    enter-token: "&aClé d'application enregistrée ! Veuillez entrer le jeton affiché dans votre application."
+    api-error: "&cÉchec de connexion au serveur API. Veuillez réessayer plus tard."
+    success: "&aEnregistrement réussi ! Vous êtes maintenant protégé par 2FA."
+    invalid-token: "&cJeton invalide. Enregistrement annulé."
+    no-pending: "&cVous n'avez pas d'enregistrement en attente."
+  
+  unlink:
+    not-linked: "&cVotre compte n'est pas lié."
+    success: "&aCompte dissocié avec succès."
+  
+  help:
+    header: "&6===== Aide MCFactor ====="
+    register: "&e/2fa <appkey> &7- Lier votre compte avec 2FA"
+    unlink: "&e/2fa &7- Dissocier votre compte"
+    help: "&e/2fa help &7- Afficher cette aide"
+    disconnect: "&e/2fa disconnect <joueur> &7- Forcer la dissociation (OP uniquement)"
+  
+  disconnect:
+    usage: "&cUsage: /2fa disconnect <joueur>"
+    success: "&aCompte de {player} dissocié avec succès."
+  
+  no-permission: "&cVous n'avez pas la permission d'utiliser cette commande."
+
+auth:
+  enter-code: "&aVeuillez entrer votre code d'authentification depuis l'application."
+  success: "&aAuthentification réussie ! Bienvenue sur le serveur."
+  invalid-code: "&cCode d'authentification invalide. Déconnexion..."
+  not-authenticated: "&cVous devez vous authentifier via l'application avant de rejoindre."

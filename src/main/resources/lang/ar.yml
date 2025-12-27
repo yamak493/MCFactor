@@ -1,0 +1,33 @@
+# Arabic Language File
+command:
+  register:
+    invalid-appkey: "&cتنسيق مفتاح التطبيق غير صالح. يرجى استخدام رمز مكون من 6 أحرف."
+    already-linked: "&cحسابك مرتبط بالفعل. استخدم /2fa لإلغاء الربط أولاً."
+    enter-token: "&aتم تسجيل مفتاح التطبيق! يرجى إدخال الرمز المعروض في تطبيقك."
+    api-error: "&cفشل الاتصال بخادم API. يرجى المحاولة مرة أخرى لاحقًا."
+    success: "&aتم التسجيل بنجاح! أنت الآن محمي بـ 2FA."
+    invalid-token: "&cرمز غير صالح. تم إلغاء التسجيل."
+    no-pending: "&cليس لديك تسجيل معلق."
+  
+  unlink:
+    not-linked: "&cحسابك غير مرتبط."
+    success: "&aتم إلغاء ربط حسابك بنجاح."
+  
+  help:
+    header: "&6===== مساعدة MCFactor ====="
+    register: "&e/2fa <appkey> &7- ربط حسابك بـ 2FA"
+    unlink: "&e/2fa &7- إلغاء ربط حسابك"
+    help: "&e/2fa help &7- عرض هذه المساعدة"
+    disconnect: "&e/2fa disconnect <لاعب> &7- فرض إلغاء الربط (OP فقط)"
+  
+  disconnect:
+    usage: "&cالاستخدام: /2fa disconnect <لاعب>"
+    success: "&aتم إلغاء ربط حساب {player} بنجاح."
+  
+  no-permission: "&cليس لديك إذن لاستخدام هذا الأمر."
+
+auth:
+  enter-code: "&aيرجى إدخال رمز المصادقة من التطبيق."
+  success: "&aنجحت المصادقة! مرحبًا بك في الخادم."
+  invalid-code: "&cرمز مصادقة غير صالح. جاري قطع الاتصال..."
+  not-authenticated: "&cيجب عليك المصادقة عبر التطبيق قبل الانضمام."

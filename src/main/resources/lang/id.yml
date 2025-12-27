@@ -1,0 +1,33 @@
+# Indonesian Language File
+command:
+  register:
+    invalid-appkey: "&cFormat kunci aplikasi tidak valid. Gunakan kode 6 karakter."
+    already-linked: "&cAkun Anda sudah terhubung. Gunakan /2fa untuk melepas tautan terlebih dahulu."
+    enter-token: "&aKunci aplikasi terdaftar! Masukkan token yang ditampilkan di aplikasi Anda."
+    api-error: "&cGagal terhubung ke server API. Coba lagi nanti."
+    success: "&aPendaftaran berhasil! Anda sekarang dilindungi dengan 2FA."
+    invalid-token: "&cToken tidak valid. Pendaftaran dibatalkan."
+    no-pending: "&cAnda tidak memiliki pendaftaran yang tertunda."
+  
+  unlink:
+    not-linked: "&cAkun Anda tidak terhubung."
+    success: "&aBerhasil melepas tautan akun Anda."
+  
+  help:
+    header: "&6===== Bantuan MCFactor ====="
+    register: "&e/2fa <appkey> &7- Hubungkan akun Anda dengan 2FA"
+    unlink: "&e/2fa &7- Lepas tautan akun Anda"
+    help: "&e/2fa help &7- Tampilkan bantuan ini"
+    disconnect: "&e/2fa disconnect <pemain> &7- Paksa lepas tautan (hanya OP)"
+  
+  disconnect:
+    usage: "&cPenggunaan: /2fa disconnect <pemain>"
+    success: "&aBerhasil melepas tautan akun {player}."
+  
+  no-permission: "&cAnda tidak memiliki izin untuk menggunakan perintah ini."
+
+auth:
+  enter-code: "&aSilakan masukkan kode autentikasi Anda dari aplikasi."
+  success: "&aAutentikasi berhasil! Selamat datang di server."
+  invalid-code: "&cKode autentikasi tidak valid. Memutuskan..."
+  not-authenticated: "&cAnda harus mengautentikasi melalui aplikasi sebelum bergabung."

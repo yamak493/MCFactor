@@ -1,0 +1,33 @@
+# Japanese Language File
+command:
+  register:
+    invalid-appkey: "&cアプリキーの形式が無効です。6文字のコードを使用してください。"
+    already-linked: "&cアカウントは既にリンクされています。まず/2faでリンクを解除してください。"
+    enter-token: "&aアプリキーが登録されました！アプリに表示されているトークンを入力してください。"
+    api-error: "&cAPIサーバーへの接続に失敗しました。後でもう一度お試しください。"
+    success: "&a登録が完了しました！2FAで保護されています。"
+    invalid-token: "&c無効なトークンです。登録がキャンセルされました。"
+    no-pending: "&c保留中の登録がありません。"
+  
+  unlink:
+    not-linked: "&cアカウントはリンクされていません。"
+    success: "&aアカウントのリンクを解除しました。"
+  
+  help:
+    header: "&6===== MCFactor ヘルプ ====="
+    register: "&e/2fa <appkey> &7- 2FAでアカウントをリンク"
+    unlink: "&e/2fa &7- アカウントのリンクを解除"
+    help: "&e/2fa help &7- このヘルプを表示"
+    disconnect: "&e/2fa disconnect <プレイヤー> &7- プレイヤーのリンクを強制解除 (OP専用)"
+  
+  disconnect:
+    usage: "&c使用方法: /2fa disconnect <プレイヤー>"
+    success: "&a{player}のアカウントリンクを解除しました。"
+  
+  no-permission: "&cこのコマンドを使用する権限がありません。"
+
+auth:
+  enter-code: "&aアプリから認証コードを入力してください。"
+  success: "&a認証に成功しました！サーバーへようこそ。"
+  invalid-code: "&c無効な認証コードです。切断しています..."
+  not-authenticated: "&cサーバーに参加する前にアプリで認証する必要があります。"

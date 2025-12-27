@@ -1,0 +1,33 @@
+# German Language File
+command:
+  register:
+    invalid-appkey: "&cUngültiges App-Schlüssel-Format. Bitte verwenden Sie einen 6-stelligen Code."
+    already-linked: "&cIhr Konto ist bereits verknüpft. Verwenden Sie zuerst /2fa zum Entfernen."
+    enter-token: "&aApp-Schlüssel registriert! Bitte geben Sie das in Ihrer App angezeigte Token ein."
+    api-error: "&cFehler beim Verbinden mit dem API-Server. Bitte versuchen Sie es später erneut."
+    success: "&aRegistrierung erfolgreich! Sie sind jetzt mit 2FA geschützt."
+    invalid-token: "&cUngültiges Token. Registrierung abgebrochen."
+    no-pending: "&cSie haben keine ausstehende Registrierung."
+  
+  unlink:
+    not-linked: "&cIhr Konto ist nicht verknüpft."
+    success: "&aKonto erfolgreich entfernt."
+  
+  help:
+    header: "&6===== MCFactor Hilfe ====="
+    register: "&e/2fa <appkey> &7- Verknüpfen Sie Ihr Konto mit 2FA"
+    unlink: "&e/2fa &7- Entfernen Sie Ihr Konto"
+    help: "&e/2fa help &7- Diese Hilfe anzeigen"
+    disconnect: "&e/2fa disconnect <spieler> &7- Verknüpfung erzwingen (nur OP)"
+  
+  disconnect:
+    usage: "&cVerwendung: /2fa disconnect <spieler>"
+    success: "&aKonto von {player} erfolgreich entfernt."
+  
+  no-permission: "&cSie haben keine Berechtigung, diesen Befehl zu verwenden."
+
+auth:
+  enter-code: "&aBitte geben Sie Ihren Authentifizierungscode aus der App ein."
+  success: "&aAuthentifizierung erfolgreich! Willkommen auf dem Server."
+  invalid-code: "&cUngültiger Authentifizierungscode. Verbindung wird getrennt..."
+  not-authenticated: "&cSie müssen sich über die App authentifizieren, bevor Sie beitreten."

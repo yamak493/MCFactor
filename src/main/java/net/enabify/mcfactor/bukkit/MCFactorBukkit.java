@@ -1,0 +1,187 @@
+package net.enabify.mcfactor.bukkit;
+
+import net.enabify.mcfactor.MCFactorPlugin;
+import net.enabify.mcfactor.api.ApiClient;
+import net.enabify.mcfactor.auth.AuthenticationManager;
+import net.enabify.mcfactor.auth.RestApiServer;
+import net.enabify.mcfactor.bukkit.command.BukkitTwoFactorCommand;
+import net.enabify.mcfactor.bukkit.listener.PlayerListener;
+import net.enabify.mcfactor.config.ConfigManager;
+import net.enabify.mcfactor.language.LanguageManager;
+import net.enabify.mcfactor.storage.LinkStorage;
+import com.google.gson.JsonObject;
+import org.bukkit.plugin.java.JavaPlugin;
+
+public class MCFactorBukkit extends JavaPlugin implements MCFactorPlugin {
+    private ConfigManager configManager;
+    private LanguageManager languageManager;
+    private LinkStorage linkStorage;
+    private AuthenticationManager authManager;
+    private RestApiServer restApiServer;
+    
+    @Override
+    public void onEnable() {
+        // Initialize managers
+        configManager = new ConfigManager(getDataFolder());
+        languageManager = new LanguageManager();
+        languageManager.setLanguage(configManager.getLanguage());
+        linkStorage = new LinkStorage(getDataFolder());
+        
+        // Check if plugin is enabled
+        if (!configManager.isEnabled()) {
+            getLogger().warning("MCFactor is disabled in config.yml");
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
+        
+        // Register server if needed
+        if (configManager.getServerId().isEmpty() || configManager.getSecretKey().isEmpty()) {
+            registerServer();
+        }
+        
+        // Initialize authentication manager
+        authManager = new AuthenticationManager(
+            linkStorage,
+            configManager.getServerId(),
+            configManager.getSecretKey()
+        );
+        
+        // Start REST API server if app authentication is enabled
+        if (configManager.isAppAuthentication()) {
+            startRestApiServer();
+            updateServerInfo();
+        }
+        
+        // Register listeners
+        getServer().getPluginManager().registerEvents(new PlayerListener(this), this);
+        
+        // Register commands
+        getCommand("2fa").setExecutor(new BukkitTwoFactorCommand(this));
+        
+        // Start cleanup task
+        getServer().getScheduler().runTaskTimerAsynchronously(this, () -> {
+            authManager.cleanupOldAuthentications();
+        }, 20L * 60, 20L * 60); // Every minute
+        
+        getLogger().info("MCFactor has been enabled!");
+    }
+    
+    @Override
+    public void onDisable() {
+        // Stop REST API server
+        if (restApiServer != null) {
+            restApiServer.stop();
+        }
+        
+        getLogger().info("MCFactor has been disabled!");
+    }
+    
+    private void registerServer() {
+        getLogger().info("Registering server with backend API...");
+        
+        try {
+            String type = configManager.isAppAuthentication() ? "app" : "code";
+            String host = configManager.getRestApiHost();
+            int port = configManager.getRestApiPort();
+            
+            JsonObject response = ApiClient.registerServer(host, port, type);
+            
+            if (response.has("serverid") && response.has("secretkey")) {
+                String serverId = response.get("serverid").getAsString();
+                String secretKey = response.get("secretkey").getAsString();
+                
+                configManager.setServerId(serverId);
+                configManager.setSecretKey(secretKey);
+                
+                getLogger().info("Server registered successfully!");
+                getLogger().info("Server ID: " + serverId);
+            } else {
+                getLogger().severe("Failed to register server: Invalid response");
+                getServer().getPluginManager().disablePlugin(this);
+            }
+        } catch (Exception e) {
+            getLogger().severe("Failed to register server: " + e.getMessage());
+            e.printStackTrace();
+            getServer().getPluginManager().disablePlugin(this);
+        }
+    }
+    
+    private void updateServerInfo() {
+        try {
+            String type = configManager.isAppAuthentication() ? "app" : "code";
+            String host = configManager.getRestApiHost();
+            int port = configManager.getRestApiPort();
+            
+            JsonObject response = ApiClient.updateServer(
+                configManager.getServerId(),
+                configManager.getSecretKey(),
+                host,
+                port,
+                type
+            );
+            
+            if (response.has("true")) {
+                getLogger().info("Server information updated successfully!");
+            } else {
+                getLogger().severe("Failed to update server information");
+                getServer().getPluginManager().disablePlugin(this);
+            }
+        } catch (Exception e) {
+            getLogger().severe("Failed to update server information: " + e.getMessage());
+            e.printStackTrace();
+            getServer().getPluginManager().disablePlugin(this);
+        }
+    }
+    
+    private void startRestApiServer() {
+        try {
+            restApiServer = new BukkitRestApiServer(
+                configManager.getRestApiPort(),
+                authManager,
+                linkStorage,
+                configManager.getServerId(),
+                configManager.getSecretKey(),
+                this
+            );
+            restApiServer.start();
+            getLogger().info("REST API server started on port " + configManager.getRestApiPort());
+        } catch (Exception e) {
+            getLogger().severe("Failed to start REST API server: " + e.getMessage());
+            e.printStackTrace();
+            getServer().getPluginManager().disablePlugin(this);
+        }
+    }
+    
+    @Override
+    public ConfigManager getConfigManager() {
+        return configManager;
+    }
+    
+    @Override
+    public LanguageManager getLanguageManager() {
+        return languageManager;
+    }
+    
+    @Override
+    public LinkStorage getLinkStorage() {
+        return linkStorage;
+    }
+    
+    @Override
+    public AuthenticationManager getAuthManager() {
+        return authManager;
+    }
+    
+    @Override
+    public void log(String message) {
+        getLogger().info(message);
+    }
+    
+    @Override
+    public void logError(String message, Exception e) {
+        getLogger().severe(message);
+        if (e != null) {
+            e.printStackTrace();
+        }
+    }
+}

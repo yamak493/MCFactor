@@ -1,0 +1,33 @@
+# English Language File
+command:
+  register:
+    invalid-appkey: "&cInvalid App Key format. Please use a 6-character code."
+    already-linked: "&cYour account is already linked. Use /2fa to unlink first."
+    enter-token: "&aApp Key registered! Please enter the token shown in your app."
+    api-error: "&cFailed to connect to the API server. Please try again later."
+    success: "&aSuccessfully registered! You are now protected with 2FA."
+    invalid-token: "&cInvalid token. Registration cancelled."
+    no-pending: "&cYou don't have a pending registration."
+  
+  unlink:
+    not-linked: "&cYour account is not linked."
+    success: "&aSuccessfully unlinked your account."
+  
+  help:
+    header: "&6===== MCFactor Help ====="
+    register: "&e/2fa <appkey> &7- Link your account with 2FA"
+    unlink: "&e/2fa &7- Unlink your account"
+    help: "&e/2fa help &7- Show this help"
+    disconnect: "&e/2fa disconnect <player> &7- Force unlink a player (OP only)"
+  
+  disconnect:
+    usage: "&cUsage: /2fa disconnect <player>"
+    success: "&aSuccessfully unlinked {player}'s account."
+  
+  no-permission: "&cYou don't have permission to use this command."
+
+auth:
+  enter-code: "&aPlease enter your authentication code from the app."
+  success: "&aAuthentication successful! Welcome to the server."
+  invalid-code: "&cInvalid authentication code. Disconnecting..."
+  not-authenticated: "&cYou must authenticate through the app before joining."

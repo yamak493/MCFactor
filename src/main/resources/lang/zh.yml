@@ -1,0 +1,33 @@
+# Chinese Language File
+command:
+  register:
+    invalid-appkey: "&c无效的应用密钥格式。请使用6个字符的代码。"
+    already-linked: "&c您的账户已经关联。请先使用 /2fa 取消关联。"
+    enter-token: "&a应用密钥已注册！请输入应用中显示的令牌。"
+    api-error: "&c无法连接到API服务器。请稍后再试。"
+    success: "&a注册成功！您现在受2FA保护。"
+    invalid-token: "&c无效的令牌。注册已取消。"
+    no-pending: "&c您没有待处理的注册。"
+  
+  unlink:
+    not-linked: "&c您的账户未关联。"
+    success: "&a成功取消关联您的账户。"
+  
+  help:
+    header: "&6===== MCFactor 帮助 ====="
+    register: "&e/2fa <appkey> &7- 使用2FA关联您的账户"
+    unlink: "&e/2fa &7- 取消关联您的账户"
+    help: "&e/2fa help &7- 显示此帮助"
+    disconnect: "&e/2fa disconnect <玩家> &7- 强制取消玩家关联（仅限OP）"
+  
+  disconnect:
+    usage: "&c用法：/2fa disconnect <玩家>"
+    success: "&a成功取消关联 {player} 的账户。"
+  
+  no-permission: "&c您没有权限使用此命令。"
+
+auth:
+  enter-code: "&a请从应用输入您的身份验证代码。"
+  success: "&a身份验证成功！欢迎来到服务器。"
+  invalid-code: "&c无效的身份验证代码。正在断开连接..."
+  not-authenticated: "&c您必须在加入之前通过应用进行身份验证。"

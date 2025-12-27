@@ -1,0 +1,33 @@
+# Portuguese Language File
+command:
+  register:
+    invalid-appkey: "&cFormato de chave de aplicativo inválido. Use um código de 6 caracteres."
+    already-linked: "&cSua conta já está vinculada. Use /2fa para desvincular primeiro."
+    enter-token: "&aChave de aplicativo registrada! Digite o token exibido em seu aplicativo."
+    api-error: "&cFalha ao conectar ao servidor API. Tente novamente mais tarde."
+    success: "&aRegistro bem-sucedido! Você agora está protegido com 2FA."
+    invalid-token: "&cToken inválido. Registro cancelado."
+    no-pending: "&cVocê não tem registro pendente."
+  
+  unlink:
+    not-linked: "&cSua conta não está vinculada."
+    success: "&aConta desvinculada com sucesso."
+  
+  help:
+    header: "&6===== Ajuda do MCFactor ====="
+    register: "&e/2fa <appkey> &7- Vincular sua conta com 2FA"
+    unlink: "&e/2fa &7- Desvincular sua conta"
+    help: "&e/2fa help &7- Mostrar esta ajuda"
+    disconnect: "&e/2fa disconnect <jogador> &7- Forçar desvinculação (apenas OP)"
+  
+  disconnect:
+    usage: "&cUso: /2fa disconnect <jogador>"
+    success: "&aConta de {player} desvinculada com sucesso."
+  
+  no-permission: "&cVocê não tem permissão para usar este comando."
+
+auth:
+  enter-code: "&aPor favor, insira seu código de autenticação do aplicativo."
+  success: "&aAutenticação bem-sucedida! Bem-vindo ao servidor."
+  invalid-code: "&cCódigo de autenticação inválido. Desconectando..."
+  not-authenticated: "&cVocê deve autenticar através do aplicativo antes de entrar."

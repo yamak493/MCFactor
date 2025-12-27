@@ -1,16 +1,21 @@
 package net.enabify.mcfactor;
 
-import net.md_5.bungee.api.plugin.Plugin;
+import net.enabify.mcfactor.bungee.MCFactorBungee;
+import net.enabify.mcfactor.bukkit.MCFactorBukkit;
 
-public final class MCFactor extends Plugin {
-
-    @Override
-    public void onEnable() {
-        // Plugin startup logic
+/**
+ * Main entry point for MCFactor plugin
+ * This class serves as a bridge to detect the platform and load the appropriate implementation
+ */
+public final class MCFactor {
+    
+    // Bukkit/Spigot entry point
+    public static class Bukkit extends MCFactorBukkit {
+        // All logic is in MCFactorBukkit
     }
-
-    @Override
-    public void onDisable() {
-        // Plugin shutdown logic
+    
+    // BungeeCord entry point
+    public static class Bungee extends MCFactorBungee {
+        // All logic is in MCFactorBungee
     }
 }

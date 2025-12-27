@@ -59,10 +59,6 @@
           <url>https://oss.sonatype.org/content/groups/public/</url>
       </repository>
       <repository>
-          <id>sonatype</id>
-          <url>https://oss.sonatype.org/content/groups/public/</url>
-      </repository>
-      <repository>
           <id>Minecraft Libraries</id>
           <url>https://libraries.minecraft.net/</url>
       </repository>
@@ -72,14 +68,24 @@
       <dependency>
           <groupId>org.spigotmc</groupId>
           <artifactId>spigot-api</artifactId>
-          <version>1.12-R0.1-SNAPSHOT</version>
+          <version>1.13.2-R0.1-SNAPSHOT</version>
           <scope>provided</scope>
       </dependency>
       <dependency>
           <groupId>net.md-5</groupId>
           <artifactId>bungeecord-api</artifactId>
-          <version>1.12-SNAPSHOT</version>
+          <version>1.16-R0.4</version>
           <scope>provided</scope>
+      </dependency>
+      <dependency>
+          <groupId>com.google.code.gson</groupId>
+          <artifactId>gson</artifactId>
+          <version>2.10.1</version>
+      </dependency>
+      <dependency>
+          <groupId>org.bouncycastle</groupId>
+          <artifactId>bcprov-jdk15on</artifactId>
+          <version>1.70</version>
       </dependency>
   </dependencies>
 </project>
