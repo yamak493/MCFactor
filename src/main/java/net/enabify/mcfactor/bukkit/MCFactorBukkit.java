@@ -58,12 +58,39 @@ public class MCFactorBukkit extends JavaPlugin implements MCFactorPlugin {
         // Register commands
         getCommand("2fa").setExecutor(new BukkitTwoFactorCommand(this));
         
-        // Start cleanup task
-        getServer().getScheduler().runTaskTimerAsynchronously(this, () -> {
-            authManager.cleanupOldAuthentications();
-        }, 20L * 60, 20L * 60); // Every minute
+        // Start cleanup task (compatible with both Bukkit and Folia)
+        startCleanupTask();
         
         getLogger().info("MCFactor has been enabled!");
+    }
+    
+    private void startCleanupTask() {
+        // Try Folia API first
+        try {
+            Class<?> asyncSchedulerClass = Class.forName("io.papermc.paper.threadedregions.scheduler.AsyncScheduler");
+            Object asyncScheduler = getServer().getClass().getMethod("getAsyncScheduler").invoke(getServer());
+            java.lang.reflect.Method runNowMethod = asyncSchedulerClass.getMethod("runNow", 
+                org.bukkit.plugin.Plugin.class, java.util.function.Consumer.class);
+            
+            runNowMethod.invoke(asyncScheduler, this, (java.util.function.Consumer<Object>) task -> {
+                try {
+                    while (!getServer().getPluginManager().isPluginEnabled(this)) {
+                        Thread.sleep(1000);
+                    }
+                    while (getServer().getPluginManager().isPluginEnabled(this)) {
+                        Thread.sleep(60000); // Every minute
+                        authManager.cleanupOldAuthentications();
+                    }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            });
+        } catch (Exception e) {
+            // Fallback to traditional Bukkit scheduler for non-Folia servers
+            getServer().getScheduler().runTaskTimer(this, () -> {
+                authManager.cleanupOldAuthentications();
+            }, 20L * 60, 20L * 60);
+        }
     }
     
     @Override

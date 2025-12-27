@@ -9,8 +9,10 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class PlayerListener implements Listener {
     private final MCFactorBukkit plugin;
@@ -19,6 +21,7 @@ public class PlayerListener implements Listener {
     public PlayerListener(MCFactorBukkit plugin) {
         this.plugin = plugin;
         this.awaitingCodeInput = new HashMap<>();
+        startSyncTaskProcessor();
     }
     
     @EventHandler(priority = EventPriority.LOWEST)
@@ -92,6 +95,26 @@ public class PlayerListener implements Listener {
                     player.kickPlayer(plugin.getLanguageManager().getMessage("auth.invalid-code"));
                 }
             });
+        }
+    }
+
+    private void startSyncTaskProcessor() {
+        Runnable cleanupTask = () -> {
+            awaitingCodeInput.entrySet().removeIf(entry -> {
+                Player target = plugin.getServer().getPlayer(entry.getKey());
+                return target == null || !target.isOnline();
+            });
+        };
+
+        try {
+            Object asyncScheduler = plugin.getServer().getClass().getMethod("getAsyncScheduler").invoke(plugin.getServer());
+            Consumer<Object> runner = ignored -> cleanupTask.run();
+            asyncScheduler.getClass()
+                .getMethod("runAtFixedRate", org.bukkit.plugin.Plugin.class, Consumer.class, Duration.class, Duration.class)
+                .invoke(asyncScheduler, plugin, runner, Duration.ofSeconds(30), Duration.ofSeconds(30));
+        } catch (Exception ignored) {
+            // Fallback to legacy scheduler when async scheduler is unavailable
+            plugin.getServer().getScheduler().runTaskTimer(plugin, cleanupTask, 20L * 30, 20L * 30);
         }
     }
 }
