@@ -1,6 +1,7 @@
 package net.enabify.mcfactor.api;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import java.io.BufferedReader;
@@ -95,6 +96,47 @@ public class ApiClient {
         return postRequest(API_BASE_URL + "/temp.php", requestBody);
     }
     
+    /**
+     * Test REST API endpoint
+     * @param host REST API host
+     * @param port REST API port
+     * @return true if the endpoint is responding, false otherwise
+     */
+    public static boolean testRestApiEndpoint(String host, int port) {
+        try {
+            String urlString = "http://" + host + ":" + port + "/authenticate";
+            URL url = new URL(urlString);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Content-Type", "application/json");
+            conn.setDoOutput(true);
+            conn.setConnectTimeout(5000); // 5 second timeout
+            conn.setReadTimeout(5000);
+            
+            // Send a test request with invalid credentials
+            JsonObject testBody = new JsonObject();
+            testBody.addProperty("appkey", "test-key");
+            testBody.addProperty("token", "TEST00");
+            
+            try (OutputStream os = conn.getOutputStream()) {
+                byte[] input = gson.toJson(testBody).getBytes(StandardCharsets.UTF_8);
+                os.write(input, 0, input.length);
+            }
+            
+            // Read response
+            int responseCode = conn.getResponseCode();
+            
+            // We expect a 403 error for invalid credentials, which means the API is working
+            // Any 4xx or 2xx response means the endpoint is responding
+            return responseCode >= 200 && responseCode < 500;
+            
+        } catch (Exception e) {
+            // Connection failed, API is not accessible
+            return false;
+        }
+    }
+    
     private static JsonObject postRequest(String urlString, JsonObject requestBody) throws Exception {
         URL url = new URL(urlString);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -121,6 +163,25 @@ public class ApiClient {
             }
         }
         
-        return gson.fromJson(response.toString(), JsonObject.class);
+        // Parse response flexibly - handle both JsonObject and other types
+        String responseString = response.toString();
+        JsonElement element = gson.fromJson(responseString, JsonElement.class);
+        
+        // If the response is already a JsonObject, return it
+        if (element.isJsonObject()) {
+            return element.getAsJsonObject();
+        }
+        
+        // If the response is a primitive (string, number, boolean), wrap it in a JsonObject
+        JsonObject result = new JsonObject();
+        if (element.isJsonPrimitive()) {
+            result.add("response", element);
+        } else if (element.isJsonArray()) {
+            result.add("response", element);
+        } else {
+            result.add("response", element);
+        }
+        
+        return result;
     }
 }

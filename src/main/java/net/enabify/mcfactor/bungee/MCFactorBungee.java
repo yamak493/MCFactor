@@ -119,7 +119,21 @@ public class MCFactorBungee extends Plugin implements MCFactorPlugin {
                 type
             );
             
-            if (response.has("true")) {
+            // Check if response indicates success
+            boolean isSuccess = false;
+            if (response.has("true") && response.get("true").getAsBoolean()) {
+                isSuccess = true;
+            } else if (response.has("response") && response.get("response").isJsonPrimitive()) {
+                try {
+                    isSuccess = response.get("response").getAsBoolean();
+                } catch (Exception e) {
+                    isSuccess = true;
+                }
+            } else if (response.size() > 0) {
+                isSuccess = true;
+            }
+            
+            if (isSuccess) {
                 getLogger().info("Server information updated successfully!");
             } else {
                 getLogger().severe("Failed to update server information");
@@ -142,10 +156,33 @@ public class MCFactorBungee extends Plugin implements MCFactorPlugin {
             );
             restApiServer.start();
             getLogger().info("REST API server started on port " + configManager.getRestApiPort());
+            
+            // Test the REST API endpoint
+            testRestApiEndpoint();
         } catch (Exception e) {
             getLogger().severe("Failed to start REST API server: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+    
+    private void testRestApiEndpoint() {
+        // Wait a moment for the server to fully start
+        getProxy().getScheduler().schedule(this, () -> {
+            String host = configManager.getRestApiHost();
+            int port = configManager.getRestApiPort();
+            
+            getLogger().info("Testing REST API endpoint at " + host + ":" + port + "...");
+            
+            boolean isWorking = ApiClient.testRestApiEndpoint(host, port);
+            
+            if (isWorking) {
+                getLogger().info("REST API endpoint test successful!");
+            } else {
+                getLogger().severe("REST API endpoint test failed!");
+                getLogger().severe("The API server may not be accessible from " + host + ":" + port);
+                getLogger().severe("Please check your config.yml settings and firewall rules.");
+            }
+        }, 1, TimeUnit.SECONDS);
     }
     
     @Override

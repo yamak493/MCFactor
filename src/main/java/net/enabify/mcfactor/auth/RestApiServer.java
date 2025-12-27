@@ -94,20 +94,18 @@ public abstract class RestApiServer {
                 }
                 
                 JsonObject request = gson.fromJson(requestBody.toString(), JsonObject.class);
-                String playerName = request.get("player").getAsString();
                 String appKey = request.get("appkey").getAsString();
                 String token = request.get("token").getAsString();
                 
                 System.out.println("[MCFactor REST API] Received authentication request");
-                System.out.println("[MCFactor REST API] Player: " + playerName);
                 System.out.println("[MCFactor REST API] App Key: " + appKey);
                 System.out.println("[MCFactor REST API] Token: " + token);
                 
-                // Find player by name
-                UUID playerUuid = findPlayerUuid(playerName);
+                // Find player by app key
+                java.util.UUID playerUuid = linkStorage.findUuidByAppKey(appKey);
                 if (playerUuid == null) {
-                    System.out.println("[MCFactor REST API] Player not found: " + playerName);
-                    sendResponse(exchange, 404, "{\"success\": false, \"error\": \"Player not found\"}");
+                    System.out.println("[MCFactor REST API] Invalid app key: " + appKey);
+                    sendResponse(exchange, 403, "{\"success\": false, \"error\": \"Invalid app key\"}");
                     return;
                 }
                 
@@ -116,7 +114,6 @@ public abstract class RestApiServer {
                 // Get player link
                 LinkStorage.PlayerLink link = linkStorage.getLink(playerUuid);
                 if (link == null) {
-                    System.out.println("[MCFactor REST API] No player link found for: " + playerName);
                     sendResponse(exchange, 403, "{\"success\": false, \"error\": \"Invalid app key\"}");
                     return;
                 }

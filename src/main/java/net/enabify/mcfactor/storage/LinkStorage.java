@@ -78,6 +78,24 @@ public class LinkStorage {
         save();
     }
     
+    /**
+     * Find player UUID by app key
+     * @param appKey The app key to search for
+     * @return The player UUID if found, null otherwise
+     */
+    public UUID findUuidByAppKey(String appKey) {
+        for (Map.Entry<String, PlayerLink> entry : links.entrySet()) {
+            if (entry.getValue().getAppKey().equals(appKey)) {
+                try {
+                    return UUID.fromString(entry.getKey());
+                } catch (IllegalArgumentException e) {
+                    return null;
+                }
+            }
+        }
+        return null;
+    }
+    
     public static class PlayerLink {
         private final String playerName;
         private final String appKey;
