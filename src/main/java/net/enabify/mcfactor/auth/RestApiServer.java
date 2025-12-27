@@ -98,26 +98,49 @@ public abstract class RestApiServer {
                 String appKey = request.get("appkey").getAsString();
                 String token = request.get("token").getAsString();
                 
+                System.out.println("[MCFactor REST API] Received authentication request");
+                System.out.println("[MCFactor REST API] Player: " + playerName);
+                System.out.println("[MCFactor REST API] App Key: " + appKey);
+                System.out.println("[MCFactor REST API] Token: " + token);
+                
                 // Find player by name
                 UUID playerUuid = findPlayerUuid(playerName);
                 if (playerUuid == null) {
+                    System.out.println("[MCFactor REST API] Player not found: " + playerName);
                     sendResponse(exchange, 404, "{\"success\": false, \"error\": \"Player not found\"}");
                     return;
                 }
                 
+                System.out.println("[MCFactor REST API] Player UUID: " + playerUuid);
+                
                 // Get player link
                 LinkStorage.PlayerLink link = linkStorage.getLink(playerUuid);
-                if (link == null || !link.getAppKey().equals(appKey)) {
+                if (link == null) {
+                    System.out.println("[MCFactor REST API] No player link found for: " + playerName);
                     sendResponse(exchange, 403, "{\"success\": false, \"error\": \"Invalid app key\"}");
                     return;
                 }
                 
-                // Verify token
-                String expectedToken = HashUtil.generateAuthToken(serverId, secretKey, link.getAppKey(), link.getPassKey());
-                if (expectedToken.equalsIgnoreCase(token)) {
+                System.out.println("[MCFactor REST API] Stored App Key: " + link.getAppKey());
+                System.out.println("[MCFactor REST API] Stored Pass Key: " + link.getPassKey());
+                
+                if (!link.getAppKey().equals(appKey)) {
+                    System.out.println("[MCFactor REST API] App key mismatch");
+                    sendResponse(exchange, 403, "{\"success\": false, \"error\": \"Invalid app key\"}");
+                    return;
+                }
+                
+                System.out.println("[MCFactor REST API] Server ID: " + serverId);
+                
+                // Verify token using the correct algorithm
+                // Token format: SHA-256(serverId + timestamp + passKey), first 6 chars uppercase
+                // Time skew tolerance: ±180 seconds (±1 interval)
+                if (HashUtil.verifyAuthToken(serverId, link.getPassKey(), token)) {
+                    System.out.println("[MCFactor REST API] Token verification SUCCESS");
                     authManager.markAuthenticated(playerUuid);
                     sendResponse(exchange, 200, "{\"success\": true}");
                 } else {
+                    System.out.println("[MCFactor REST API] Token verification FAILED");
                     sendResponse(exchange, 403, "{\"success\": false, \"error\": \"Invalid token\"}");
                 }
                 

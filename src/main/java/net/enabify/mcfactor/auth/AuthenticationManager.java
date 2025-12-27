@@ -43,6 +43,8 @@ public class AuthenticationManager {
     
     /**
      * Complete registration by verifying token
+     * Token format: SHA-256(serverId + timestamp + passKey), first 6 chars uppercase
+     * Accepts tokens from current interval and ±1 interval (time skew tolerance)
      */
     public boolean completeRegistration(UUID playerUuid, String token) {
         PendingRegistration registration = pendingRegistrations.get(playerUuid);
@@ -50,14 +52,8 @@ public class AuthenticationManager {
             return false;
         }
         
-        String expectedToken = HashUtil.generateAuthToken(
-            serverId, 
-            secretKey, 
-            registration.appKey, 
-            registration.passKey
-        );
-        
-        if (expectedToken.equalsIgnoreCase(token)) {
+        // Use the new HashUtil method that handles time skew tolerance
+        if (HashUtil.verifyAuthToken(serverId, registration.passKey, token)) {
             linkStorage.addLink(
                 playerUuid, 
                 registration.playerName, 
@@ -87,6 +83,8 @@ public class AuthenticationManager {
     
     /**
      * Verify code for code authentication mode
+     * Code format: SHA-256(serverId + timestamp + passKey), first 6 chars uppercase
+     * Uses the player's passKey to generate codes
      */
     public boolean verifyCode(UUID playerUuid, String code) {
         LinkStorage.PlayerLink link = linkStorage.getLink(playerUuid);
@@ -94,14 +92,8 @@ public class AuthenticationManager {
             return false;
         }
         
-        String expectedToken = HashUtil.generateAuthToken(
-            serverId, 
-            secretKey, 
-            link.getAppKey(), 
-            link.getPassKey()
-        );
-        
-        return expectedToken.equalsIgnoreCase(code);
+        // Use verifyAuthToken with the player's passKey
+        return HashUtil.verifyAuthToken(serverId, link.getPassKey(), code);
     }
     
     /**
