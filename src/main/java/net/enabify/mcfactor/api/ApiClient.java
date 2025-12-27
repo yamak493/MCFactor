@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ApiClient {
-    private static final String API_BASE_URL = "https://api.mcfactor.enabify.net";
+    private static final String API_BASE_URL = "https://api.enabify.net/mcfactor";
     private static final Gson gson = new Gson();
     
     // Rate limiting maps
