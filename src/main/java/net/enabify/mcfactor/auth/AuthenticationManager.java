@@ -13,6 +13,9 @@ public class AuthenticationManager {
     // Track pending registrations
     private final Map<UUID, PendingRegistration> pendingRegistrations;
     
+    // Track players awaiting code input (for code authentication mode)
+    private final Set<UUID> awaitingCodeInput;
+    
     // Track authenticated players (for app authentication mode)
     private final Map<UUID, Long> authenticatedPlayers;
     
@@ -21,6 +24,7 @@ public class AuthenticationManager {
         this.serverId = serverId;
         this.secretKey = secretKey;
         this.pendingRegistrations = new HashMap<>();
+        this.awaitingCodeInput = new HashSet<>();
         this.authenticatedPlayers = new HashMap<>();
     }
     
@@ -79,6 +83,24 @@ public class AuthenticationManager {
      */
     public boolean hasPendingRegistration(UUID playerUuid) {
         return pendingRegistrations.containsKey(playerUuid);
+    }
+
+    /**
+     * Set player as awaiting code input
+     */
+    public void setAwaitingCodeInput(UUID playerUuid, boolean awaiting) {
+        if (awaiting) {
+            awaitingCodeInput.add(playerUuid);
+        } else {
+            awaitingCodeInput.remove(playerUuid);
+        }
+    }
+
+    /**
+     * Check if player is awaiting code input
+     */
+    public boolean isAwaitingCodeInput(UUID playerUuid) {
+        return awaitingCodeInput.contains(playerUuid);
     }
     
     /**

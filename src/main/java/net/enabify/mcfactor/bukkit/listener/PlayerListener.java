@@ -16,11 +16,9 @@ import java.util.function.Consumer;
 
 public class PlayerListener implements Listener {
     private final MCFactorBukkit plugin;
-    private final Map<String, Boolean> awaitingCodeInput;
     
     public PlayerListener(MCFactorBukkit plugin) {
         this.plugin = plugin;
-        this.awaitingCodeInput = new HashMap<>();
         startSyncTaskProcessor();
     }
     
@@ -35,7 +33,7 @@ public class PlayerListener implements Listener {
         
         // Code authentication mode
         if (plugin.getConfigManager().isCodeAuthentication()) {
-            awaitingCodeInput.put(player.getName(), true);
+            plugin.getAuthManager().setAwaitingCodeInput(player.getUniqueId(), true);
             
             // Freeze player
             player.setWalkSpeed(0);
@@ -105,7 +103,7 @@ public class PlayerListener implements Listener {
         }
         
         // Check if player is awaiting code input
-        if (awaitingCodeInput.containsKey(player.getName())) {
+        if (plugin.getAuthManager().isAwaitingCodeInput(player.getUniqueId())) {
             event.setCancelled(true);
             
             String code = event.getMessage().trim();
@@ -139,7 +137,7 @@ public class PlayerListener implements Listener {
                 }
                 
                 if (plugin.getAuthManager().verifyCode(player.getUniqueId(), code)) {
-                    awaitingCodeInput.remove(player.getName());
+                    plugin.getAuthManager().setAwaitingCodeInput(player.getUniqueId(), false);
                     
                     // Unfreeze player
                     player.setWalkSpeed(0.2f);
@@ -153,23 +151,12 @@ public class PlayerListener implements Listener {
         }
     }
 
-    private void startSyncTaskProcessor() {
-        Runnable cleanupTask = () -> {
-            awaitingCodeInput.entrySet().removeIf(entry -> {
-                Player target = plugin.getServer().getPlayer(entry.getKey());
-                return target == null || !target.isOnline();
-            });
-        };
+    @EventHandler
+    public void onPlayerQuit(org.bukkit.event.player.PlayerQuitEvent event) {
+        plugin.getAuthManager().setAwaitingCodeInput(event.getPlayer().getUniqueId(), false);
+    }
 
-        try {
-            Object asyncScheduler = plugin.getServer().getClass().getMethod("getAsyncScheduler").invoke(plugin.getServer());
-            Consumer<Object> runner = ignored -> cleanupTask.run();
-            asyncScheduler.getClass()
-                .getMethod("runAtFixedRate", org.bukkit.plugin.Plugin.class, Consumer.class, Duration.class, Duration.class)
-                .invoke(asyncScheduler, plugin, runner, Duration.ofSeconds(30), Duration.ofSeconds(30));
-        } catch (Exception ignored) {
-            // Fallback to legacy scheduler when async scheduler is unavailable
-            plugin.getServer().getScheduler().runTaskTimer(plugin, cleanupTask, 20L * 30, 20L * 30);
-        }
+    private void startSyncTaskProcessor() {
+        // No longer needed as we use PlayerQuitEvent for cleanup
     }
 }

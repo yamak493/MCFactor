@@ -16,11 +16,9 @@ import java.util.concurrent.TimeUnit;
 
 public class BungeePlayerListener implements Listener {
     private final MCFactorBungee plugin;
-    private final Map<String, Boolean> awaitingCodeInput;
     
     public BungeePlayerListener(MCFactorBungee plugin) {
         this.plugin = plugin;
-        this.awaitingCodeInput = new HashMap<>();
     }
     
     @EventHandler(priority = EventPriority.LOWEST)
@@ -34,7 +32,7 @@ public class BungeePlayerListener implements Listener {
         
         // Code authentication mode
         if (plugin.getConfigManager().isCodeAuthentication()) {
-            awaitingCodeInput.put(player.getName(), true);
+            plugin.getAuthManager().setAwaitingCodeInput(player.getUniqueId(), true);
             
             // Send message
             player.sendMessage(new TextComponent(
@@ -110,7 +108,7 @@ public class BungeePlayerListener implements Listener {
         }
         
         // Check if player is awaiting code input
-        if (awaitingCodeInput.containsKey(player.getName())) {
+        if (plugin.getAuthManager().isAwaitingCodeInput(player.getUniqueId())) {
             event.setCancelled(true);
             
             String code = event.getMessage().trim();
@@ -143,7 +141,7 @@ public class BungeePlayerListener implements Listener {
             }
             
             if (plugin.getAuthManager().verifyCode(player.getUniqueId(), code)) {
-                awaitingCodeInput.remove(player.getName());
+                plugin.getAuthManager().setAwaitingCodeInput(player.getUniqueId(), false);
                 player.sendMessage(new TextComponent(
                     plugin.getLanguageManager().getMessage("auth.success")
                 ));
@@ -153,5 +151,10 @@ public class BungeePlayerListener implements Listener {
                 ));
             }
         }
+    }
+
+    @EventHandler
+    public void onPlayerQuit(net.md_5.bungee.api.event.PlayerDisconnectEvent event) {
+        plugin.getAuthManager().setAwaitingCodeInput(event.getPlayer().getUniqueId(), false);
     }
 }

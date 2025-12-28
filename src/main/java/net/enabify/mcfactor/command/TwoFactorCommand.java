@@ -28,6 +28,12 @@ public abstract class TwoFactorCommand {
      * Handle /2fa <appkey> - Register app key
      */
     protected void handleRegister(UUID playerUuid, String playerName, String appKey) {
+        // Check if awaiting code input
+        if (authManager.isAwaitingCodeInput(playerUuid)) {
+            sendMessage(playerUuid, languageManager.getMessage("auth.enter-code"));
+            return;
+        }
+
         // Validate app key format (6 characters)
         if (appKey.length() != 6) {
             sendMessage(playerUuid, languageManager.getMessage("command.register.invalid-appkey"));
@@ -67,6 +73,12 @@ public abstract class TwoFactorCommand {
      * Handle /2fa - Unlink
      */
     protected void handleUnlink(UUID playerUuid) {
+        // Check if awaiting code input
+        if (authManager.isAwaitingCodeInput(playerUuid)) {
+            sendMessage(playerUuid, languageManager.getMessage("auth.enter-code"));
+            return;
+        }
+
         if (!linkStorage.hasLink(playerUuid)) {
             sendMessage(playerUuid, languageManager.getMessage("command.unlink.not-linked"));
             return;
