@@ -7,6 +7,10 @@ description: Two-factor authentication plugin for Minecraft servers
 website: https://mcfactor.enabify.net
 folia-supported: true
 
+# Plugin Messaging Channels for Proxy communication
+channels:
+  - mcfactor:authstate
+
 commands:
   2fa:
     description: Two-factor authentication commands

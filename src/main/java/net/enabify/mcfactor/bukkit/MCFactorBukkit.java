@@ -6,18 +6,24 @@ import net.enabify.mcfactor.auth.AuthenticationManager;
 import net.enabify.mcfactor.auth.RestApiServer;
 import net.enabify.mcfactor.bukkit.command.BukkitTwoFactorCommand;
 import net.enabify.mcfactor.bukkit.listener.PlayerListener;
+import net.enabify.mcfactor.bukkit.freeze.PlayerFreezeManager;
 import net.enabify.mcfactor.config.ConfigManager;
 import net.enabify.mcfactor.language.LanguageManager;
 import net.enabify.mcfactor.storage.LinkStorage;
+import net.enabify.mcfactor.messaging.MessagingConstants;
+import net.enabify.mcfactor.messaging.AuthStateMessage;
 import com.google.gson.JsonObject;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.messaging.PluginMessageListener;
 
-public class MCFactorBukkit extends JavaPlugin implements MCFactorPlugin {
+public class MCFactorBukkit extends JavaPlugin implements MCFactorPlugin, PluginMessageListener {
     private ConfigManager configManager;
     private LanguageManager languageManager;
     private LinkStorage linkStorage;
     private AuthenticationManager authManager;
     private RestApiServer restApiServer;
+    private PlayerFreezeManager freezeManager;
     
     @Override
     public void onEnable() {
@@ -26,6 +32,7 @@ public class MCFactorBukkit extends JavaPlugin implements MCFactorPlugin {
         languageManager = new LanguageManager();
         languageManager.setLanguage(configManager.getLanguage());
         linkStorage = new LinkStorage(getDataFolder());
+        freezeManager = new PlayerFreezeManager();
         
         // Check if plugin is enabled
         if (!configManager.isEnabled()) {
@@ -33,6 +40,26 @@ public class MCFactorBukkit extends JavaPlugin implements MCFactorPlugin {
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
+        
+        // Determine operation mode based on proxy-mode flag
+        boolean isProxyMode = configManager.isProxyMode();
+        
+        if (isProxyMode) {
+            // Mode 3: Downstream server behind proxy - only handle freeze control
+            getLogger().info("Running in Proxy Mode (downstream server) - freeze control only");
+            
+            // Register Plugin Messaging Channel to receive auth state from proxy
+            getServer().getMessenger().registerIncomingPluginChannel(this, MessagingConstants.CHANNEL_NAME, this);
+            
+            // Register listeners for freeze control
+            getServer().getPluginManager().registerEvents(new PlayerListener(this), this);
+            
+            getLogger().info("MCFactor has been enabled in Proxy Mode!");
+            return;
+        }
+        
+        // Mode 1: Standalone server - full authentication and freeze control
+        getLogger().info("Running in Standalone Mode - full authentication");
         
         // Register server if needed
         if (configManager.getServerId().isEmpty() || configManager.getSecretKey().isEmpty()) {
@@ -218,7 +245,7 @@ public class MCFactorBukkit extends JavaPlugin implements MCFactorPlugin {
             }
         }, 20L); // Wait 1 second (20 ticks)
     }
-    
+
     @Override
     public ConfigManager getConfigManager() {
         return configManager;
@@ -248,6 +275,57 @@ public class MCFactorBukkit extends JavaPlugin implements MCFactorPlugin {
     public void logError(String message, Exception e) {
         getLogger().severe(message);
         if (e != null) {
+            e.printStackTrace();
+        }
+    }
+    
+    public PlayerFreezeManager getFreezeManager() {
+        return freezeManager;
+    }
+    
+    /**
+     * Handle Plugin Messages from BungeeCord proxy
+     * Receives authentication state updates and applies freeze/unfreeze accordingly
+     */
+    @Override
+    public void onPluginMessageReceived(String channel, Player player, byte[] message) {
+        if (!channel.equals(MessagingConstants.CHANNEL_NAME)) {
+            return;
+        }
+        
+        try {
+            AuthStateMessage authState = AuthStateMessage.fromBytes(message);
+            
+            getLogger().info("Received auth state for player " + authState.getPlayerUuid() + 
+                           ": " + (authState.isAuthenticated() ? "AUTHED" : "UNAUTHED"));
+            
+            // Find the player on this server
+            Player targetPlayer = getServer().getPlayer(authState.getPlayerUuid());
+            if (targetPlayer == null || !targetPlayer.isOnline()) {
+                getLogger().warning("Received auth state for offline player: " + authState.getPlayerUuid());
+                return;
+            }
+            
+            // Apply freeze/unfreeze based on authentication state
+            if (authState.isAuthenticated()) {
+                // Player is authenticated - unfreeze
+                if (freezeManager.isFrozen(targetPlayer.getUniqueId())) {
+                    getServer().getScheduler().runTask(this, () -> {
+                        freezeManager.unfreezePlayer(targetPlayer);
+                        getLogger().info("Unfroze player " + targetPlayer.getName());
+                    });
+                }
+            } else {
+                // Player is not authenticated - freeze
+                if (!freezeManager.isFrozen(targetPlayer.getUniqueId())) {
+                    getServer().getScheduler().runTask(this, () -> {
+                        freezeManager.freezePlayer(targetPlayer);
+                        getLogger().info("Froze player " + targetPlayer.getName());
+                    });
+                }
+            }
+        } catch (Exception e) {
+            getLogger().severe("Failed to process auth state message: " + e.getMessage());
             e.printStackTrace();
         }
     }

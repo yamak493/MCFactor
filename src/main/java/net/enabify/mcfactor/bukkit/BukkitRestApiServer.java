@@ -33,4 +33,15 @@ public class BukkitRestApiServer extends RestApiServer {
         
         return null;
     }
+    
+    @Override
+    protected void onAuthenticationSuccess(UUID playerUuid) {
+        // In standalone mode, unfreeze the player if they are frozen
+        Player player = Bukkit.getPlayer(playerUuid);
+        if (player != null && plugin.getFreezeManager().isFrozen(playerUuid)) {
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                plugin.getFreezeManager().unfreezePlayer(player);
+            });
+        }
+    }
 }

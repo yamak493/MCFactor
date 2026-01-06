@@ -1,14 +1,16 @@
 package net.enabify.mcfactor;
 
 import net.enabify.mcfactor.auth.AuthenticationManager;
-import net.enabify.mcfactor.config.ConfigManager;
+import net.enabify.mcfactor.config.MCFactorConfig;
 import net.enabify.mcfactor.language.LanguageManager;
 import net.enabify.mcfactor.storage.LinkStorage;
 
 import java.io.File;
 
 public interface MCFactorPlugin {
-    ConfigManager getConfigManager();
+    MCFactorConfig getConfigManager();
+    // Platform implementations expose their config managers through MCFactorConfig so callers can
+    // interact with shared configuration without depending on platform-specific types.
     LanguageManager getLanguageManager();
     LinkStorage getLinkStorage();
     AuthenticationManager getAuthManager();

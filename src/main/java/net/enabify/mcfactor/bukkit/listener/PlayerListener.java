@@ -8,6 +8,9 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 
 import java.time.Duration;
 import java.util.HashMap;
@@ -26,6 +29,12 @@ public class PlayerListener implements Listener {
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
         
+        // If in proxy mode, we don't manage authentication here
+        if (plugin.getConfigManager().isProxyMode()) {
+            // In proxy mode, freeze state will be set via Plugin Message from proxy
+            return;
+        }
+        
         // Check if player has linked account
         if (!plugin.getLinkStorage().hasLink(player.getUniqueId())) {
             return;
@@ -35,9 +44,8 @@ public class PlayerListener implements Listener {
         if (plugin.getConfigManager().isCodeAuthentication()) {
             plugin.getAuthManager().setAwaitingCodeInput(player.getUniqueId(), true);
             
-            // Freeze player
-            player.setWalkSpeed(0);
-            player.setFlySpeed(0);
+            // Freeze player using FreezeManager
+            plugin.getFreezeManager().freezePlayer(player);
             
             // Send message
             player.sendMessage(plugin.getLanguageManager().getMessage("auth.enter-code"));
@@ -52,6 +60,56 @@ public class PlayerListener implements Listener {
                     }
                 }, 20L); // Wait 1 second
             }
+        }
+    }
+    
+    /**
+     * Cancel movement for frozen players
+     */
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onPlayerMove(PlayerMoveEvent event) {
+        Player player = event.getPlayer();
+        
+        // Check if player is frozen
+        if (plugin.getFreezeManager().isFrozen(player.getUniqueId())) {
+            // Get freeze location
+            org.bukkit.Location freezeLoc = plugin.getFreezeManager().getFreezeLocation(player.getUniqueId());
+            if (freezeLoc != null) {
+                // Cancel movement if player moved from freeze location
+                if (!isSameBlock(event.getFrom(), freezeLoc)) {
+                    event.setCancelled(true);
+                    player.teleport(freezeLoc);
+                }
+            }
+        }
+    }
+    
+    /**
+     * Check if two locations are in the same block
+     */
+    private boolean isSameBlock(org.bukkit.Location loc1, org.bukkit.Location loc2) {
+        return loc1.getBlockX() == loc2.getBlockX() &&
+               loc1.getBlockY() == loc2.getBlockY() &&
+               loc1.getBlockZ() == loc2.getBlockZ();
+    }
+    
+    /**
+     * Cancel commands for frozen players (safety measure)
+     */
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onPlayerCommand(PlayerCommandPreprocessEvent event) {
+        Player player = event.getPlayer();
+        
+        // Allow 2fa command even when frozen
+        if (event.getMessage().toLowerCase().startsWith("/2fa") || 
+            event.getMessage().toLowerCase().startsWith("/2f")) {
+            return;
+        }
+        
+        // Cancel other commands if player is frozen
+        if (plugin.getFreezeManager().isFrozen(player.getUniqueId())) {
+            event.setCancelled(true);
+            player.sendMessage(plugin.getLanguageManager().getMessage("auth.enter-code"));
         }
     }
     
@@ -139,9 +197,8 @@ public class PlayerListener implements Listener {
                 if (plugin.getAuthManager().verifyCode(player.getUniqueId(), code)) {
                     plugin.getAuthManager().setAwaitingCodeInput(player.getUniqueId(), false);
                     
-                    // Unfreeze player
-                    player.setWalkSpeed(0.2f);
-                    player.setFlySpeed(0.1f);
+                    // Unfreeze player using FreezeManager
+                    plugin.getFreezeManager().unfreezePlayer(player);
                     
                     player.sendMessage(plugin.getLanguageManager().getMessage("auth.success"));
                 } else {
@@ -152,8 +209,11 @@ public class PlayerListener implements Listener {
     }
 
     @EventHandler
-    public void onPlayerQuit(org.bukkit.event.player.PlayerQuitEvent event) {
+    public void onPlayerQuit(PlayerQuitEvent event) {
         plugin.getAuthManager().setAwaitingCodeInput(event.getPlayer().getUniqueId(), false);
+        
+        // Cleanup freeze data
+        plugin.getFreezeManager().cleanup(event.getPlayer().getUniqueId());
     }
 
     private void startSyncTaskProcessor() {

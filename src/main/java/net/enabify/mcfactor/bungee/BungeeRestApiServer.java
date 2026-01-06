@@ -25,4 +25,13 @@ public class BungeeRestApiServer extends RestApiServer {
         
         return null;
     }
+    
+    @Override
+    protected void onAuthenticationSuccess(UUID playerUuid) {
+        // Send authentication state to downstream servers
+        ProxiedPlayer player = plugin.getProxy().getPlayer(playerUuid);
+        if (player != null) {
+            plugin.sendAuthState(player, true);
+        }
+    }
 }

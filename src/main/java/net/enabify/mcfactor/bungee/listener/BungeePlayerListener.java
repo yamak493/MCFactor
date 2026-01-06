@@ -6,6 +6,7 @@ import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.ChatEvent;
 import net.md_5.bungee.api.event.PostLoginEvent;
+import net.md_5.bungee.api.event.ServerConnectedEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.event.EventPriority;
@@ -30,6 +31,11 @@ public class BungeePlayerListener implements Listener {
             return;
         }
         
+        // Send initial UNAUTHED state
+        plugin.getProxy().getScheduler().schedule(plugin, () -> {
+            plugin.sendAuthState(player, false);
+        }, 500, TimeUnit.MILLISECONDS);
+        
         // Code authentication mode
         if (plugin.getConfigManager().isCodeAuthentication()) {
             plugin.getAuthManager().setAwaitingCodeInput(player.getUniqueId(), true);
@@ -52,6 +58,25 @@ public class BungeePlayerListener implements Listener {
                 }, 1, TimeUnit.SECONDS);
             }
         }
+    }
+    
+    /**
+     * Send authentication state when player connects to a server
+     */
+    @EventHandler
+    public void onServerConnected(ServerConnectedEvent event) {
+        ProxiedPlayer player = event.getPlayer();
+        
+        // Check if player has linked account
+        if (!plugin.getLinkStorage().hasLink(player.getUniqueId())) {
+            return;
+        }
+        
+        // Send current authentication state to the server
+        boolean authenticated = plugin.getAuthManager().isAuthenticated(player.getUniqueId());
+        plugin.getProxy().getScheduler().schedule(plugin, () -> {
+            plugin.sendAuthState(player, authenticated);
+        }, 500, TimeUnit.MILLISECONDS);
     }
     
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -145,6 +170,9 @@ public class BungeePlayerListener implements Listener {
                 player.sendMessage(new TextComponent(
                     plugin.getLanguageManager().getMessage("auth.success")
                 ));
+                
+                // Send AUTHED state to downstream servers
+                plugin.sendAuthState(player, true);
             } else {
                 player.disconnect(new TextComponent(
                     plugin.getLanguageManager().getMessage("auth.invalid-code")

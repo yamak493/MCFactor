@@ -6,16 +6,19 @@ import net.enabify.mcfactor.auth.AuthenticationManager;
 import net.enabify.mcfactor.auth.RestApiServer;
 import net.enabify.mcfactor.bungee.command.BungeeTwoFactorCommand;
 import net.enabify.mcfactor.bungee.listener.BungeePlayerListener;
-import net.enabify.mcfactor.config.ConfigManager;
+import net.enabify.mcfactor.config.BungeeConfigManager;
 import net.enabify.mcfactor.language.LanguageManager;
 import net.enabify.mcfactor.storage.LinkStorage;
+import net.enabify.mcfactor.messaging.MessagingConstants;
+import net.enabify.mcfactor.messaging.AuthStateMessage;
 import com.google.gson.JsonObject;
 import net.md_5.bungee.api.plugin.Plugin;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 import java.util.concurrent.TimeUnit;
 
 public class MCFactorBungee extends Plugin implements MCFactorPlugin {
-    private ConfigManager configManager;
+    private BungeeConfigManager configManager;
     private LanguageManager languageManager;
     private LinkStorage linkStorage;
     private AuthenticationManager authManager;
@@ -24,7 +27,7 @@ public class MCFactorBungee extends Plugin implements MCFactorPlugin {
     @Override
     public void onEnable() {
         // Initialize managers
-        configManager = new ConfigManager(getDataFolder());
+        configManager = new BungeeConfigManager(getDataFolder());
         languageManager = new LanguageManager();
         languageManager.setLanguage(configManager.getLanguage());
         linkStorage = new LinkStorage(getDataFolder());
@@ -34,6 +37,9 @@ public class MCFactorBungee extends Plugin implements MCFactorPlugin {
             getLogger().warning("MCFactor is disabled in config.yml");
             return;
         }
+        
+        // Register Plugin Messaging Channel
+        getProxy().registerChannel(MessagingConstants.CHANNEL_NAME);
         
         // Register server if needed
         if (configManager.getServerId().isEmpty() || configManager.getSecretKey().isEmpty()) {
@@ -186,7 +192,7 @@ public class MCFactorBungee extends Plugin implements MCFactorPlugin {
     }
     
     @Override
-    public ConfigManager getConfigManager() {
+    public BungeeConfigManager getConfigManager() {
         return configManager;
     }
     
@@ -214,6 +220,27 @@ public class MCFactorBungee extends Plugin implements MCFactorPlugin {
     public void logError(String message, Exception e) {
         getLogger().severe(message);
         if (e != null) {
+            e.printStackTrace();
+        }
+    }
+    
+    /**
+     * Send authentication state to all downstream servers
+     * This notifies servers whether a player is authenticated or not
+     */
+    public void sendAuthState(ProxiedPlayer player, boolean authenticated) {
+        try {
+            AuthStateMessage message = new AuthStateMessage(player.getUniqueId(), authenticated);
+            byte[] data = message.toBytes();
+            
+            // Send to the server the player is currently connected to
+            if (player.getServer() != null) {
+                player.getServer().sendData(MessagingConstants.CHANNEL_NAME, data);
+                getLogger().info("Sent auth state to server for player " + player.getName() + 
+                               ": " + (authenticated ? "AUTHED" : "UNAUTHED"));
+            }
+        } catch (Exception e) {
+            getLogger().severe("Failed to send auth state: " + e.getMessage());
             e.printStackTrace();
         }
     }

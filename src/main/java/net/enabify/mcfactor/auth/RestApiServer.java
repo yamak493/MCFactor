@@ -68,6 +68,15 @@ public abstract class RestApiServer {
      */
     protected abstract UUID findPlayerUuid(String playerName);
     
+    /**
+     * Called when authentication succeeds - can be overridden by platform-specific subclasses
+     * to send plugin messages or perform other actions
+     */
+    protected void onAuthenticationSuccess(UUID playerUuid) {
+        // Default implementation does nothing
+        // Override in platform-specific subclasses if needed
+    }
+    
     private class AuthenticateHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
@@ -135,6 +144,10 @@ public abstract class RestApiServer {
                 if (HashUtil.verifyAuthToken(serverId, link.getPassKey(), token)) {
                     System.out.println("[MCFactor REST API] Token verification SUCCESS");
                     authManager.markAuthenticated(playerUuid);
+                    
+                    // Call hook for platform-specific actions (e.g., sending plugin messages)
+                    onAuthenticationSuccess(playerUuid);
+                    
                     sendResponse(exchange, 200, "{\"success\": true}");
                 } else {
                     System.out.println("[MCFactor REST API] Token verification FAILED");
