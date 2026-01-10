@@ -13,6 +13,7 @@ import net.enabify.mcfactor.language.LanguageManager;
 import net.enabify.mcfactor.storage.LinkStorage;
 import net.enabify.mcfactor.messaging.MessagingConstants;
 import net.enabify.mcfactor.messaging.AuthStateMessage;
+import net.enabify.mcfactor.util.FoliaScheduler;
 import com.google.gson.JsonObject;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.entity.Player;
@@ -93,32 +94,9 @@ public class MCFactorBukkit extends JavaPlugin implements MCFactorPlugin, Plugin
     }
     
     private void startCleanupTask() {
-        // Try Folia API first
-        try {
-            Class<?> asyncSchedulerClass = Class.forName("io.papermc.paper.threadedregions.scheduler.AsyncScheduler");
-            Object asyncScheduler = getServer().getClass().getMethod("getAsyncScheduler").invoke(getServer());
-            java.lang.reflect.Method runNowMethod = asyncSchedulerClass.getMethod("runNow", 
-                org.bukkit.plugin.Plugin.class, java.util.function.Consumer.class);
-            
-            runNowMethod.invoke(asyncScheduler, this, (java.util.function.Consumer<Object>) task -> {
-                try {
-                    while (!getServer().getPluginManager().isPluginEnabled(this)) {
-                        Thread.sleep(1000);
-                    }
-                    while (getServer().getPluginManager().isPluginEnabled(this)) {
-                        Thread.sleep(60000); // Every minute
-                        authManager.cleanupOldAuthentications();
-                    }
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-            });
-        } catch (Exception e) {
-            // Fallback to traditional Bukkit scheduler for non-Folia servers
-            getServer().getScheduler().runTaskTimer(this, () -> {
-                authManager.cleanupOldAuthentications();
-            }, 20L * 60, 20L * 60);
-        }
+        FoliaScheduler.runGlobalTaskTimer(this, () -> {
+            authManager.cleanupOldAuthentications();
+        }, 20L * 60, 20L * 60);
     }
     
     @Override
@@ -229,7 +207,7 @@ public class MCFactorBukkit extends JavaPlugin implements MCFactorPlugin, Plugin
     
     private void testRestApiEndpoint() {
         // Wait a moment for the server to fully start
-        getServer().getScheduler().runTaskLater(this, () -> {
+        FoliaScheduler.runGlobalTaskLater(this, () -> {
             String host = configManager.getRestApiHost();
             int port = configManager.getRestApiPort();
             
@@ -311,7 +289,7 @@ public class MCFactorBukkit extends JavaPlugin implements MCFactorPlugin, Plugin
             if (authState.isAuthenticated()) {
                 // Player is authenticated - unfreeze
                 if (freezeManager.isFrozen(targetPlayer.getUniqueId())) {
-                    getServer().getScheduler().runTask(this, () -> {
+                    FoliaScheduler.runTask(this, targetPlayer, () -> {
                         freezeManager.unfreezePlayer(targetPlayer);
                         getLogger().info("Unfroze player " + targetPlayer.getName());
                     });
@@ -319,7 +297,7 @@ public class MCFactorBukkit extends JavaPlugin implements MCFactorPlugin, Plugin
             } else {
                 // Player is not authenticated - freeze
                 if (!freezeManager.isFrozen(targetPlayer.getUniqueId())) {
-                    getServer().getScheduler().runTask(this, () -> {
+                    FoliaScheduler.runTask(this, targetPlayer, () -> {
                         freezeManager.freezePlayer(targetPlayer);
                         getLogger().info("Froze player " + targetPlayer.getName());
                     });

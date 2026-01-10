@@ -3,6 +3,7 @@ package net.enabify.mcfactor.bukkit;
 import net.enabify.mcfactor.auth.AuthenticationManager;
 import net.enabify.mcfactor.auth.RestApiServer;
 import net.enabify.mcfactor.storage.LinkStorage;
+import net.enabify.mcfactor.util.FoliaScheduler;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -39,7 +40,7 @@ public class BukkitRestApiServer extends RestApiServer {
         // In standalone mode, unfreeze the player if they are frozen
         Player player = Bukkit.getPlayer(playerUuid);
         if (player != null && plugin.getFreezeManager().isFrozen(playerUuid)) {
-            Bukkit.getScheduler().runTask(plugin, () -> {
+            FoliaScheduler.runTask(plugin, player, () -> {
                 plugin.getFreezeManager().unfreezePlayer(player);
             });
         }

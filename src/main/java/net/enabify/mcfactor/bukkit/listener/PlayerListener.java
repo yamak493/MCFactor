@@ -1,6 +1,7 @@
 package net.enabify.mcfactor.bukkit.listener;
 
 import net.enabify.mcfactor.bukkit.MCFactorBukkit;
+import net.enabify.mcfactor.util.FoliaScheduler;
 import net.enabify.mcfactor.storage.LinkStorage;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -61,7 +62,7 @@ public class PlayerListener implements Listener {
         // App authentication mode
         if (plugin.getConfigManager().isAppAuthentication()) {
             if (!plugin.getAuthManager().isAuthenticated(player.getUniqueId())) {
-                plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+                FoliaScheduler.runTaskLater(plugin, player, () -> {
                     if (!plugin.getAuthManager().isAuthenticated(player.getUniqueId())) {
                         player.kickPlayer(plugin.getLanguageManager().getMessage("auth.not-authenticated"));
                     }
@@ -85,7 +86,7 @@ public class PlayerListener implements Listener {
                 // Cancel movement if player moved from freeze location
                 if (!isSameBlock(event.getFrom(), freezeLoc)) {
                     event.setCancelled(true);
-                    player.teleport(freezeLoc);
+                    FoliaScheduler.teleport(player, freezeLoc);
                 }
             }
         }
@@ -209,7 +210,7 @@ public class PlayerListener implements Listener {
         // Check if player is in registration process
         if (plugin.getAuthManager().hasPendingRegistration(player.getUniqueId())) {
             String token = event.getMessage().trim();
-            plugin.getServer().getScheduler().runTask(plugin, () -> {
+            FoliaScheduler.runTask(plugin, player, () -> {
                 plugin.getLogger().info("[MCFactor] Player " + player.getName() + " attempting token registration");
                 plugin.getLogger().info("[MCFactor] Input token: " + token);
                 
@@ -252,7 +253,7 @@ public class PlayerListener implements Listener {
             event.setCancelled(true);
             
             String code = event.getMessage().trim();
-            plugin.getServer().getScheduler().runTask(plugin, () -> {
+            FoliaScheduler.runTask(plugin, player, () -> {
                 plugin.getLogger().info("[MCFactor] Player " + player.getName() + " attempting code authentication");
                 plugin.getLogger().info("[MCFactor] Input code: " + code);
                 
