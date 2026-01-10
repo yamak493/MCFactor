@@ -11,6 +11,13 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.entity.EntityPickupItemEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 
 import java.time.Duration;
 import java.util.HashMap;
@@ -91,6 +98,73 @@ public class PlayerListener implements Listener {
         return loc1.getBlockX() == loc2.getBlockX() &&
                loc1.getBlockY() == loc2.getBlockY() &&
                loc1.getBlockZ() == loc2.getBlockZ();
+    }
+
+    /**
+     * Block inventory operations for frozen players
+     */
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onInventoryClick(InventoryClickEvent event) {
+        if (plugin.getFreezeManager().isFrozen(event.getWhoClicked().getUniqueId())) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onInventoryDrag(InventoryDragEvent event) {
+        if (plugin.getFreezeManager().isFrozen(event.getWhoClicked().getUniqueId())) {
+            event.setCancelled(true);
+        }
+    }
+
+    /**
+     * Block item drops for frozen players
+     */
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onPlayerDropItem(PlayerDropItemEvent event) {
+        if (plugin.getFreezeManager().isFrozen(event.getPlayer().getUniqueId())) {
+            event.setCancelled(true);
+        }
+    }
+
+    /**
+     * Block item pickup for frozen players
+     */
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onPlayerPickupItem(EntityPickupItemEvent event) {
+        if (event.getEntity() instanceof Player && plugin.getFreezeManager().isFrozen(event.getEntity().getUniqueId())) {
+            event.setCancelled(true);
+        }
+    }
+
+    /**
+     * Block interactions for frozen players
+     */
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onPlayerInteract(PlayerInteractEvent event) {
+        if (plugin.getFreezeManager().isFrozen(event.getPlayer().getUniqueId())) {
+            event.setCancelled(true);
+        }
+    }
+
+    /**
+     * Block entity interactions for frozen players
+     */
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
+        if (plugin.getFreezeManager().isFrozen(event.getPlayer().getUniqueId())) {
+            event.setCancelled(true);
+        }
+    }
+
+    /**
+     * Block hand item swap for frozen players
+     */
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onPlayerSwapHandItems(PlayerSwapHandItemsEvent event) {
+        if (plugin.getFreezeManager().isFrozen(event.getPlayer().getUniqueId())) {
+            event.setCancelled(true);
+        }
     }
     
     /**

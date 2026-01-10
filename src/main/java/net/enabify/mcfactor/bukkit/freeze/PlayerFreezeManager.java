@@ -1,6 +1,5 @@
 package net.enabify.mcfactor.bukkit.freeze;
 
-import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
@@ -10,13 +9,13 @@ import java.util.UUID;
 
 /**
  * Manages player freeze state for authentication
- * Uses SPECTATOR mode + Move event cancellation to restrict player movement
+ * Blocks movement and various player actions
  */
 public class PlayerFreezeManager {
     private final Map<UUID, FreezeData> frozenPlayers = new HashMap<>();
     
     /**
-     * Freeze a player (set to SPECTATOR mode and record original state)
+     * Freeze a player (record original state and restrict movement)
      */
     public void freezePlayer(Player player) {
         if (frozenPlayers.containsKey(player.getUniqueId())) {
@@ -25,26 +24,16 @@ public class PlayerFreezeManager {
         
         // Store original state
         FreezeData data = new FreezeData(
-            player.getGameMode(),
             player.getLocation().clone()
         );
         frozenPlayers.put(player.getUniqueId(), data);
-        
-        // Set to spectator mode
-        player.setGameMode(GameMode.SPECTATOR);
     }
     
     /**
-     * Unfreeze a player (restore original game mode)
+     * Unfreeze a player
      */
     public void unfreezePlayer(Player player) {
-        FreezeData data = frozenPlayers.remove(player.getUniqueId());
-        if (data == null) {
-            return; // Not frozen
-        }
-        
-        // Restore original game mode
-        player.setGameMode(data.getOriginalGameMode());
+        frozenPlayers.remove(player.getUniqueId());
     }
     
     /**
@@ -73,16 +62,10 @@ public class PlayerFreezeManager {
      * Data class to store freeze information
      */
     private static class FreezeData {
-        private final GameMode originalGameMode;
         private final Location freezeLocation;
         
-        public FreezeData(GameMode originalGameMode, Location freezeLocation) {
-            this.originalGameMode = originalGameMode;
+        public FreezeData(Location freezeLocation) {
             this.freezeLocation = freezeLocation;
-        }
-        
-        public GameMode getOriginalGameMode() {
-            return originalGameMode;
         }
         
         public Location getFreezeLocation() {
