@@ -88,6 +88,7 @@ public class VelocityPlayerListener {
         
         // Check if player is in registration process
         if (plugin.getAuthManager().hasPendingRegistration(player.getUniqueId())) {
+            event.setResult(PlayerChatEvent.ChatResult.denied());
             String token = event.getMessage().trim();
             plugin.getLogger().info("[MCFactor] Player " + player.getUsername() + " attempting token registration");
             
@@ -101,14 +102,12 @@ public class VelocityPlayerListener {
                 ));
                 plugin.getAuthManager().cancelRegistration(player.getUniqueId());
             }
-            
-            // Do not call event.setResult(ChatResult.denied()) for signed messages (1.19.1+)
-            // The downstream server will handle clearing the chat for unauthenticated players.
             return;
         }
         
         // Check if player is awaiting code input
         if (plugin.getAuthManager().isAwaitingCodeInput(player.getUniqueId())) {
+            event.setResult(PlayerChatEvent.ChatResult.denied());
             String code = event.getMessage().trim();
             plugin.getLogger().info("[MCFactor] Player " + player.getUsername() + " attempting code authentication");
             
@@ -126,9 +125,6 @@ public class VelocityPlayerListener {
                     plugin.getLanguageManager().getMessage("auth.invalid-code")
                 ));
             }
-            
-            // Do not call event.setResult(ChatResult.denied()) for signed messages (1.19.1+)
-            // The downstream server will handle clearing the chat for unauthenticated players.
         }
     }
     

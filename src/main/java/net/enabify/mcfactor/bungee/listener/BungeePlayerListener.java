@@ -85,6 +85,11 @@ public class BungeePlayerListener implements Listener {
             return;
         }
         
+        // Skip commands
+        if (event.isCommand()) {
+            return;
+        }
+        
         ProxiedPlayer player = (ProxiedPlayer) event.getSender();
         
         // Check if player is in registration process

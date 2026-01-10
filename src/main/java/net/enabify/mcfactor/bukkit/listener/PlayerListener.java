@@ -192,12 +192,19 @@ public class PlayerListener implements Listener {
     public void onPlayerChat(AsyncPlayerChatEvent event) {
         Player player = event.getPlayer();
         
+        // Check if player is in registration process (standalone mode)
+        if (plugin.getAuthManager() != null && plugin.getAuthManager().hasPendingRegistration(player.getUniqueId())) {
+            event.setCancelled(true);
+            handleLocalChatAuth(event);
+            return;
+        }
+        
         // Check if player is frozen (this is our UNAUTHED state, used in both standalone and proxy mode)
         if (plugin.getFreezeManager().isFrozen(player.getUniqueId())) {
             event.setCancelled(true);
             
             // If we are NOT in proxy mode, handle the code input here locally
-            if (!plugin.getConfigManager().isProxyMode()) {
+            if (plugin.getAuthManager() != null && !plugin.getConfigManager().isProxyMode()) {
                 handleLocalChatAuth(event);
             }
             return;
