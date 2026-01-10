@@ -8,7 +8,6 @@ import net.enabify.mcfactor.bukkit.command.BukkitTwoFactorCommand;
 import net.enabify.mcfactor.bukkit.listener.PlayerListener;
 import net.enabify.mcfactor.bukkit.freeze.PlayerFreezeManager;
 import net.enabify.mcfactor.bukkit.config.BukkitConfigManager;
-import net.enabify.mcfactor.config.ConfigManager;
 import net.enabify.mcfactor.config.MCFactorConfig;
 import net.enabify.mcfactor.language.LanguageManager;
 import net.enabify.mcfactor.storage.LinkStorage;
@@ -249,8 +248,8 @@ public class MCFactorBukkit extends JavaPlugin implements MCFactorPlugin, Plugin
     }
 
     @Override
-    public ConfigManager getConfigManager() {
-        return (ConfigManager) configManager;
+    public MCFactorConfig getConfigManager() {
+        return configManager;
     }
     
     @Override

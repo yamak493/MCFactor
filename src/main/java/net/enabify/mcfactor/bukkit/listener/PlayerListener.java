@@ -223,7 +223,9 @@ public class PlayerListener implements Listener {
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
-        plugin.getAuthManager().setAwaitingCodeInput(event.getPlayer().getUniqueId(), false);
+        if (plugin.getAuthManager() != null) {
+            plugin.getAuthManager().setAwaitingCodeInput(event.getPlayer().getUniqueId(), false);
+        }
         
         // Cleanup freeze data
         plugin.getFreezeManager().cleanup(event.getPlayer().getUniqueId());
