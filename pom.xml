@@ -81,6 +81,10 @@
           <id>Minecraft Libraries</id>
           <url>https://libraries.minecraft.net/</url>
       </repository>
+      <repository>
+          <id>papermc</id>
+          <url>https://repo.papermc.io/repository/maven-public/</url>
+      </repository>
   </repositories>
 
   <dependencies>
@@ -94,6 +98,18 @@
           <groupId>net.md-5</groupId>
           <artifactId>bungeecord-api</artifactId>
           <version>1.16-R0.4</version>
+          <scope>provided</scope>
+          <exclusions>
+              <exclusion>
+                  <groupId>net.md-5</groupId>
+                  <artifactId>brigadier</artifactId>
+              </exclusion>
+          </exclusions>
+      </dependency>
+      <dependency>
+          <groupId>com.velocitypowered</groupId>
+          <artifactId>velocity-api</artifactId>
+          <version>3.1.1</version>
           <scope>provided</scope>
       </dependency>
       <dependency>

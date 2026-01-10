@@ -1,14 +1,18 @@
 package net.enabify.mcfactor.config;
 
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.DumperOptions;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ConfigManager implements MCFactorConfig {
     private final File configFile;
-    private FileConfiguration config;
+    private Map<String, Object> config;
     
     private static final int CONFIG_VERSION = 1;
     
@@ -24,117 +28,179 @@ public class ConfigManager implements MCFactorConfig {
         if (!configFile.exists()) {
             createDefaultConfig();
         }
-        config = YamlConfiguration.loadConfiguration(configFile);
         
-        // Check config version and update if needed
-        if (config.getInt("config-version", 0) != CONFIG_VERSION) {
-            updateConfig();
+        try (FileInputStream fis = new FileInputStream(configFile)) {
+            Yaml yaml = new Yaml();
+            Map<String, Object> loadedConfig = yaml.load(fis);
+            config = loadedConfig != null ? loadedConfig : new HashMap<>();
+            
+            // Check config version and update if needed
+            int version = getIntValue("config-version", 0);
+            if (version != CONFIG_VERSION) {
+                updateConfig();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            config = new HashMap<>();
         }
     }
     
     private void createDefaultConfig() {
-        config = new YamlConfiguration();
+        config = new HashMap<>();
         
         // Basic settings
-        config.set("enabled", true);
-        config.set("language", "en");
-        config.set("config-version", CONFIG_VERSION);
+        config.put("enabled", true);
+        config.put("language", "en");
+        config.put("config-version", CONFIG_VERSION);
         
         // Authentication modes
-        config.set("code-authentication", true);
-        config.set("app-authentication", false);
+        config.put("code-authentication", true);
+        config.put("app-authentication", false);
         
         // REST API settings (for app authentication)
-        config.set("rest-api.host", "0.0.0.0");
-        config.set("rest-api.port", 25566);
+        Map<String, Object> restApi = new HashMap<>();
+        restApi.put("host", "0.0.0.0");
+        restApi.put("port", 25566);
+        config.put("rest-api", restApi);
         
         // Proxy mode (true if this server is behind a proxy)
-        config.set("proxy-mode", false);
+        config.put("proxy-mode", false);
         
         // Server credentials (auto-generated on first run)
-        config.set("server-id", "");
-        config.set("secret-key", "");
+        config.put("server-id", "");
+        config.put("secret-key", "");
         
         saveConfig();
     }
     
     private void updateConfig() {
-        config.set("config-version", CONFIG_VERSION);
+        config.put("config-version", CONFIG_VERSION);
         saveConfig();
     }
     
     @Override
     public void saveConfig() {
-        try {
-            config.save(configFile);
+        try (FileWriter writer = new FileWriter(configFile)) {
+            DumperOptions options = new DumperOptions();
+            options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+            Yaml yaml = new Yaml(options);
+            yaml.dump(config, writer);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
     
-    public FileConfiguration getConfig() {
+    @SuppressWarnings("unchecked")
+    public Map<String, Object> getConfig() {
         return config;
     }
     
     @Override
     public boolean isEnabled() {
-        return config.getBoolean("enabled", true);
+        return getBooleanValue("enabled", true);
     }
     
     @Override
     public String getLanguage() {
-        return config.getString("language", "en");
+        return getStringValue("language", "en");
     }
     
     @Override
     public boolean isCodeAuthentication() {
-        return config.getBoolean("code-authentication", true);
+        return getBooleanValue("code-authentication", true);
     }
     
     @Override
     public boolean isAppAuthentication() {
-        return config.getBoolean("app-authentication", false);
+        return getBooleanValue("app-authentication", false);
     }
     
     @Override
     public String getRestApiHost() {
-        return config.getString("rest-api.host", "0.0.0.0");
+        return getNestedStringValue("rest-api", "host", "0.0.0.0");
     }
     
     @Override
     public int getRestApiPort() {
-        return config.getInt("rest-api.port", 25566);
+        return getNestedIntValue("rest-api", "port", 25566);
     }
     
     @Override
     public String getServerId() {
-        return config.getString("server-id", "");
+        return getStringValue("server-id", "");
     }
     
     @Override
     public void setServerId(String serverId) {
-        config.set("server-id", serverId);
+        config.put("server-id", serverId);
         saveConfig();
     }
     
     @Override
     public String getSecretKey() {
-        return config.getString("secret-key", "");
+        return getStringValue("secret-key", "");
     }
     
     @Override
     public void setSecretKey(String secretKey) {
-        config.set("secret-key", secretKey);
+        config.put("secret-key", secretKey);
         saveConfig();
     }
     
     @Override
     public boolean isProxyMode() {
-        return config.getBoolean("proxy-mode", false);
+        return getBooleanValue("proxy-mode", false);
     }
     
     @Override
     public void reload() {
-        config = YamlConfiguration.loadConfiguration(configFile);
+        loadConfig();
+    }
+    
+    // Helper methods
+    private String getStringValue(String key, String defaultValue) {
+        Object value = config.get(key);
+        return value instanceof String ? (String) value : defaultValue;
+    }
+    
+    private int getIntValue(String key, int defaultValue) {
+        Object value = config.get(key);
+        if (value instanceof Integer) {
+            return (Integer) value;
+        } else if (value instanceof Number) {
+            return ((Number) value).intValue();
+        }
+        return defaultValue;
+    }
+    
+    private boolean getBooleanValue(String key, boolean defaultValue) {
+        Object value = config.get(key);
+        return value instanceof Boolean ? (Boolean) value : defaultValue;
+    }
+    
+    @SuppressWarnings("unchecked")
+    private String getNestedStringValue(String parentKey, String childKey, String defaultValue) {
+        Object parent = config.get(parentKey);
+        if (parent instanceof Map) {
+            Map<String, Object> parentMap = (Map<String, Object>) parent;
+            Object value = parentMap.get(childKey);
+            return value instanceof String ? (String) value : defaultValue;
+        }
+        return defaultValue;
+    }
+    
+    @SuppressWarnings("unchecked")
+    private int getNestedIntValue(String parentKey, String childKey, int defaultValue) {
+        Object parent = config.get(parentKey);
+        if (parent instanceof Map) {
+            Map<String, Object> parentMap = (Map<String, Object>) parent;
+            Object value = parentMap.get(childKey);
+            if (value instanceof Integer) {
+                return (Integer) value;
+            } else if (value instanceof Number) {
+                return ((Number) value).intValue();
+            }
+        }
+        return defaultValue;
     }
 }

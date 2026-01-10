@@ -117,10 +117,23 @@ public class PlayerListener implements Listener {
     public void onPlayerChat(AsyncPlayerChatEvent event) {
         Player player = event.getPlayer();
         
-        // Check if player is in registration process
-        if (plugin.getAuthManager().hasPendingRegistration(player.getUniqueId())) {
+        // Check if player is frozen (this is our UNAUTHED state, used in both standalone and proxy mode)
+        if (plugin.getFreezeManager().isFrozen(player.getUniqueId())) {
             event.setCancelled(true);
             
+            // If we are NOT in proxy mode, handle the code input here locally
+            if (!plugin.getConfigManager().isProxyMode()) {
+                handleLocalChatAuth(event);
+            }
+            return;
+        }
+    }
+    
+    private void handleLocalChatAuth(AsyncPlayerChatEvent event) {
+        Player player = event.getPlayer();
+        
+        // Check if player is in registration process
+        if (plugin.getAuthManager().hasPendingRegistration(player.getUniqueId())) {
             String token = event.getMessage().trim();
             plugin.getServer().getScheduler().runTask(plugin, () -> {
                 plugin.getLogger().info("[MCFactor] Player " + player.getName() + " attempting token registration");

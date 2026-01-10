@@ -4,6 +4,7 @@ import net.enabify.mcfactor.storage.LinkStorage;
 import net.enabify.mcfactor.util.HashUtil;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class AuthenticationManager {
     private final LinkStorage linkStorage;
@@ -23,9 +24,9 @@ public class AuthenticationManager {
         this.linkStorage = linkStorage;
         this.serverId = serverId;
         this.secretKey = secretKey;
-        this.pendingRegistrations = new HashMap<>();
-        this.awaitingCodeInput = new HashSet<>();
-        this.authenticatedPlayers = new HashMap<>();
+        this.pendingRegistrations = new ConcurrentHashMap<>();
+        this.awaitingCodeInput = Collections.newSetFromMap(new ConcurrentHashMap<>());
+        this.authenticatedPlayers = new ConcurrentHashMap<>();
     }
     
     /**

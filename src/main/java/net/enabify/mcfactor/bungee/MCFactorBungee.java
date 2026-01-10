@@ -229,19 +229,22 @@ public class MCFactorBungee extends Plugin implements MCFactorPlugin {
      * This notifies servers whether a player is authenticated or not
      */
     public void sendAuthState(ProxiedPlayer player, boolean authenticated) {
+        net.md_5.bungee.api.connection.Server server = player.getServer();
+        if (server == null) {
+            return;
+        }
+        
         try {
+            // Create auth state message
             AuthStateMessage message = new AuthStateMessage(player.getUniqueId(), authenticated);
-            byte[] data = message.toBytes();
             
-            // Send to the server the player is currently connected to
-            if (player.getServer() != null) {
-                player.getServer().sendData(MessagingConstants.CHANNEL_NAME, data);
-                getLogger().info("Sent auth state to server for player " + player.getName() + 
-                               ": " + (authenticated ? "AUTHED" : "UNAUTHED"));
-            }
+            // Send the plugin message
+            server.sendData(MessagingConstants.CHANNEL_NAME, message.toBytes());
+            
+            getLogger().info("Sent auth state to server for player " + player.getName() +
+                           ": " + (authenticated ? "AUTHED" : "UNAUTHED"));
         } catch (Exception e) {
-            getLogger().severe("Failed to send auth state: " + e.getMessage());
-            e.printStackTrace();
+            getLogger().warning("Failed to send auth state: " + e.getMessage());
         }
     }
 }

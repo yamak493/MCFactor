@@ -173,4 +173,44 @@ public class HashUtil {
         
         return false;
     }
+    
+    /**
+     * Verify auth token with debug output (SLF4J Logger version for Velocity)
+     * @param serverId Server ID
+     * @param passKey Pass Key
+     * @param token Token to verify
+     * @param logger SLF4J Logger for output (optional, can be null)
+     * @return true if token is valid
+     */
+    public static boolean verifyAuthTokenDebug(String serverId, String passKey, String token, org.slf4j.Logger logger) {
+        long currentTimestamp = getTimestamp();
+        
+        if (logger != null) {
+            logger.info("[MCFactor Verify Debug] Current Timestamp: " + currentTimestamp);
+            logger.info("[MCFactor Verify Debug] Input Token: " + token);
+        }
+        
+        // Check current interval and ±1 interval
+        for (long offset = -180; offset <= 180; offset += 180) {
+            long testTimestamp = currentTimestamp + offset;
+            String expectedToken = generateAuthToken(serverId, testTimestamp, passKey);
+            
+            if (logger != null) {
+                logger.info("[MCFactor Verify Debug] Testing timestamp " + testTimestamp + " -> token: " + expectedToken);
+            }
+            
+            if (expectedToken.equals(token)) {
+                if (logger != null) {
+                    logger.info("[MCFactor Verify Debug] Token MATCHED with timestamp " + testTimestamp);
+                }
+                return true;
+            }
+        }
+        
+        if (logger != null) {
+            logger.info("[MCFactor Verify Debug] Token FAILED - no match in any interval");
+        }
+        
+        return false;
+    }
 }

@@ -1,0 +1,11 @@
+{
+  "id": "mcfactor",
+  "name": "MCFactor",
+  "version": "1.0-SNAPSHOT",
+  "description": "Two-factor authentication plugin for Minecraft",
+  "authors": [
+    "Enabify"
+  ],
+  "main": "net.enabify.mcfactor.velocity.MCFactorVelocity",
+  "dependencies": []
+}

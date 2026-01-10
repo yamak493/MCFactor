@@ -7,7 +7,9 @@ import net.enabify.mcfactor.auth.RestApiServer;
 import net.enabify.mcfactor.bukkit.command.BukkitTwoFactorCommand;
 import net.enabify.mcfactor.bukkit.listener.PlayerListener;
 import net.enabify.mcfactor.bukkit.freeze.PlayerFreezeManager;
+import net.enabify.mcfactor.bukkit.config.BukkitConfigManager;
 import net.enabify.mcfactor.config.ConfigManager;
+import net.enabify.mcfactor.config.MCFactorConfig;
 import net.enabify.mcfactor.language.LanguageManager;
 import net.enabify.mcfactor.storage.LinkStorage;
 import net.enabify.mcfactor.messaging.MessagingConstants;
@@ -18,7 +20,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.messaging.PluginMessageListener;
 
 public class MCFactorBukkit extends JavaPlugin implements MCFactorPlugin, PluginMessageListener {
-    private ConfigManager configManager;
+    private MCFactorConfig configManager;
     private LanguageManager languageManager;
     private LinkStorage linkStorage;
     private AuthenticationManager authManager;
@@ -28,7 +30,7 @@ public class MCFactorBukkit extends JavaPlugin implements MCFactorPlugin, Plugin
     @Override
     public void onEnable() {
         // Initialize managers
-        configManager = new ConfigManager(getDataFolder());
+        configManager = new BukkitConfigManager(getDataFolder());
         languageManager = new LanguageManager();
         languageManager.setLanguage(configManager.getLanguage());
         linkStorage = new LinkStorage(getDataFolder());
@@ -248,7 +250,7 @@ public class MCFactorBukkit extends JavaPlugin implements MCFactorPlugin, Plugin
 
     @Override
     public ConfigManager getConfigManager() {
-        return configManager;
+        return (ConfigManager) configManager;
     }
     
     @Override
