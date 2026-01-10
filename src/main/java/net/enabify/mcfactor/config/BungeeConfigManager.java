@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 
 public class BungeeConfigManager implements MCFactorConfig {
     private final File configFile;
@@ -40,6 +41,23 @@ public class BungeeConfigManager implements MCFactorConfig {
     }
     
     private void createDefaultConfig() {
+        try {
+            // Try to copy from resources first
+            InputStream resourceStream = BungeeConfigManager.class.getResourceAsStream("/config.yml");
+            if (resourceStream != null) {
+                Files.copy(resourceStream, configFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                resourceStream.close();
+            } else {
+                // Fallback: create default configuration manually
+                createConfigFromDefaults();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            createConfigFromDefaults();
+        }
+    }
+    
+    private void createConfigFromDefaults() {
         try {
             configFile.createNewFile();
             config = new Configuration();

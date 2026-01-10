@@ -51,7 +51,3 @@ nbdist/
 
 # Mac
 .DS_Store
-
-# Plugin specific
-config.yml
-link.json

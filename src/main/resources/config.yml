@@ -1,0 +1,44 @@
+# MCFactor Configuration File
+
+# Whether the plugin is enabled.
+enabled: true
+
+# The language used by the plugin for messages.
+# Supported languages: ar (Arabic), de (German), en (English), es (Spanish), fr (French), 
+# hi (Hindi), id (Indonesian), ja (Japanese), pt (Portuguese), ru (Russian), zh (Chinese)
+language: en
+
+# The version of the configuration file. Do not change this manually.
+config-version: 1
+
+# Enable code-based authentication. 
+# Players see a code in the mobile app and enter it in-game.
+# Note: Enabling this will automatically disable app-authentication.
+code-authentication: true
+
+# Enable app-based authentication. 
+# Players approve the login in the mobile app, which communicates with the plugin's REST API.
+# Note: Enabling this will automatically disable code-authentication.
+app-authentication: false
+
+# REST API settings for app-based authentication.
+# This port must be accessible from the internet if you use app-based authentication.
+rest-api:
+  # The host address the REST API server will bind to. (Default: 0.0.0.0)
+  host: 0.0.0.0
+  # The port the REST API server will listen on. (Default: 25566)
+  port: 25566
+
+# Proxy mode settings.
+# Set this to true if the server is a downstream server (Paper/Folia) behind a proxy (Velocity/BungeeCord).
+# If true, authentication is handled by the proxy, and this server will only handle player freezing.
+proxy-mode: false
+
+# Unique ID assigned to this server for 2FA. 
+# This is automatically generated on the first run. DO NOT CHANGE.
+server-id: ''
+
+# Secret key for communication with the backend. 
+# This is automatically generated on the first run. DO NOT CHANGE.
+secret-key: ''
+

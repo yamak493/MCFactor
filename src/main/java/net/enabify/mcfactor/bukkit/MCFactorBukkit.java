@@ -30,7 +30,7 @@ public class MCFactorBukkit extends JavaPlugin implements MCFactorPlugin, Plugin
     @Override
     public void onEnable() {
         // Initialize managers
-        configManager = new BukkitConfigManager(getDataFolder());
+        configManager = new BukkitConfigManager(this, getDataFolder());
         languageManager = new LanguageManager();
         languageManager.setLanguage(configManager.getLanguage());
         linkStorage = new LinkStorage(getDataFolder());

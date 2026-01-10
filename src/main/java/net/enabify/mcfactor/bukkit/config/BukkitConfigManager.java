@@ -3,17 +3,21 @@ package net.enabify.mcfactor.bukkit.config;
 import net.enabify.mcfactor.config.MCFactorConfig;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 
 public class BukkitConfigManager implements MCFactorConfig {
     private final File configFile;
+    private final JavaPlugin plugin;
     private FileConfiguration config;
     
     private static final int CONFIG_VERSION = 1;
     
-    public BukkitConfigManager(File dataFolder) {
+    public BukkitConfigManager(JavaPlugin plugin, File dataFolder) {
+        this.plugin = plugin;
         if (!dataFolder.exists()) {
             dataFolder.mkdirs();
         }
@@ -34,6 +38,27 @@ public class BukkitConfigManager implements MCFactorConfig {
     }
     
     private void createDefaultConfig() {
+        try {
+            // Try to copy from plugin resources first
+            InputStream resourceStream = plugin.getResource("config.yml");
+            if (resourceStream != null) {
+                plugin.saveResource("config.yml", false);
+                // The resource should now be in the plugin's data folder
+                File tempFile = new File(plugin.getDataFolder(), "config.yml");
+                if (tempFile.exists() && !tempFile.equals(configFile)) {
+                    tempFile.renameTo(configFile);
+                }
+            } else {
+                // Fallback: create default configuration manually
+                createConfigFromDefaults();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            createConfigFromDefaults();
+        }
+    }
+    
+    private void createConfigFromDefaults() {
         config = new YamlConfiguration();
         
         // Basic settings
