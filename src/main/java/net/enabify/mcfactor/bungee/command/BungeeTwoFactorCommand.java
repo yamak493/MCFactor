@@ -11,16 +11,18 @@ import java.util.UUID;
 
 public class BungeeTwoFactorCommand extends Command {
     private final BungeeTwoFactorHandler handler;
+    private final MCFactorBungee plugin;
     
     public BungeeTwoFactorCommand(MCFactorBungee plugin) {
         super("2fa", null, "2f");
+        this.plugin = plugin;
         this.handler = new BungeeTwoFactorHandler(plugin);
     }
     
     @Override
     public void execute(CommandSender sender, String[] args) {
         if (!(sender instanceof ProxiedPlayer)) {
-            sender.sendMessage(new TextComponent("This command can only be used by players."));
+            sender.sendMessage(TextComponent.fromLegacyText(plugin.getLanguageManager().getMessage("command.only-players")));
             return;
         }
         
@@ -73,6 +75,10 @@ class BungeeTwoFactorHandler extends TwoFactorCommand {
                 }
                 break;
         }
+    }
+    
+    public String getOnlyPlayersMessage() {
+        return plugin.getLanguageManager().getMessage("command.only-players");
     }
     
     @Override

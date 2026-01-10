@@ -25,6 +25,7 @@ command:
     success: "&aSuccessfully unlinked {player}'s account."
   
   no-permission: "&cYou don't have permission to use this command."
+  only-players: "&cThis command can only be used by players."
 
 auth:
   enter-code: "&aPlease enter your authentication code from the app."

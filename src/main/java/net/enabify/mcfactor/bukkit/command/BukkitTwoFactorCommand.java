@@ -21,7 +21,7 @@ public class BukkitTwoFactorCommand extends TwoFactorCommand implements CommandE
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player)) {
-            sender.sendMessage("This command can only be used by players.");
+            sender.sendMessage(languageManager.getMessage("command.only-players"));
             return true;
         }
         

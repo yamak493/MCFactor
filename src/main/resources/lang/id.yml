@@ -25,6 +25,7 @@ command:
     success: "&aBerhasil melepas tautan akun {player}."
   
   no-permission: "&cAnda tidak memiliki izin untuk menggunakan perintah ini."
+  only-players: "&cPerintah ini hanya dapat digunakan oleh pemain."
 
 auth:
   enter-code: "&aSilakan masukkan kode autentikasi Anda dari aplikasi."

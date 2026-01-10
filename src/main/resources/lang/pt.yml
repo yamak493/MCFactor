@@ -25,6 +25,7 @@ command:
     success: "&aConta de {player} desvinculada com sucesso."
   
   no-permission: "&cVocê não tem permissão para usar este comando."
+  only-players: "&cEste comando só pode ser usado por jogadores."
 
 auth:
   enter-code: "&aPor favor, insira seu código de autenticação do aplicativo."

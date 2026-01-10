@@ -25,6 +25,7 @@ command:
     success: "&aKonto von {player} erfolgreich entfernt."
   
   no-permission: "&cSie haben keine Berechtigung, diesen Befehl zu verwenden."
+  only-players: "&cDieser Befehl kann nur von Spielern verwendet werden."
 
 auth:
   enter-code: "&aBitte geben Sie Ihren Authentifizierungscode aus der App ein."

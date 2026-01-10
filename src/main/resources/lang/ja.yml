@@ -25,6 +25,7 @@ command:
     success: "&a{player}のアカウントリンクを解除しました。"
   
   no-permission: "&cこのコマンドを使用する権限がありません。"
+  only-players: "&cこのコマンドはプレイヤーのみ使用できます。"
 
 auth:
   enter-code: "&aアプリから認証コードを入力してください。"

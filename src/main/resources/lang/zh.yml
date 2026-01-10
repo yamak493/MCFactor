@@ -25,6 +25,7 @@ command:
     success: "&a成功取消关联 {player} 的账户。"
   
   no-permission: "&c您没有权限使用此命令。"
+  only-players: "&c此命令只能由玩家使用。"
 
 auth:
   enter-code: "&a请从应用输入您的身份验证代码。"
