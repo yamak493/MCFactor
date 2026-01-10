@@ -9,6 +9,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+
 public class LanguageManager {
     private static final Yaml YAML = new Yaml();
     private final Map<String, Map<String, String>> languages;
@@ -80,19 +83,29 @@ public class LanguageManager {
         }
     }
     
+    private String applyColorCodes(String message) {
+        if (message == null) return null;
+        // Convert ampersand color codes (&) to section sign (§) which is used by legacy format
+        return message.replace('&', '\u00A7');
+    }
+
     public String getMessage(String key) {
         Map<String, String> lang = languages.get(currentLanguage);
+        String raw = null;
         if (lang != null && lang.containsKey(key)) {
-            return lang.get(key);
+            raw = lang.get(key);
         }
         
         // Fallback to English
-        Map<String, String> defaultLang = languages.get("en");
-        if (defaultLang != null && defaultLang.containsKey(key)) {
-            return defaultLang.get(key);
+        if (raw == null) {
+            Map<String, String> defaultLang = languages.get("en");
+            if (defaultLang != null && defaultLang.containsKey(key)) {
+                raw = defaultLang.get(key);
+            }
         }
         
-        return key;
+        if (raw == null) return key;
+        return applyColorCodes(raw);
     }
     
     public String getMessage(String key, Map<String, String> replacements) {
@@ -103,5 +116,21 @@ public class LanguageManager {
         }
         
         return message;
+    }
+
+    /**
+     * Returns a Kyori Component deserialized from legacy color codes.
+     */
+    public Component getComponent(String key) {
+        String message = getMessage(key);
+        return LegacyComponentSerializer.legacySection().deserialize(message);
+    }
+
+    /**
+     * Returns a component with replacements applied.
+     */
+    public Component getComponent(String key, Map<String, String> replacements) {
+        String message = getMessage(key, replacements);
+        return LegacyComponentSerializer.legacySection().deserialize(message);
     }
 }

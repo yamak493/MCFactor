@@ -79,7 +79,7 @@ class BungeeTwoFactorHandler extends TwoFactorCommand {
     protected void sendMessage(UUID playerUuid, String message) {
         ProxiedPlayer player = plugin.getProxy().getPlayer(playerUuid);
         if (player != null && player.isConnected()) {
-            player.sendMessage(new TextComponent(message));
+            player.sendMessage(TextComponent.fromLegacyText(message));
         }
     }
 }

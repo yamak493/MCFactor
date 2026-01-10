@@ -41,7 +41,7 @@ public class BungeePlayerListener implements Listener {
             plugin.getAuthManager().setAwaitingCodeInput(player.getUniqueId(), true);
             
             // Send message
-            player.sendMessage(new TextComponent(
+            player.sendMessage(TextComponent.fromLegacyText(
                 plugin.getLanguageManager().getMessage("auth.enter-code")
             ));
         }
@@ -51,7 +51,7 @@ public class BungeePlayerListener implements Listener {
             if (!plugin.getAuthManager().isAuthenticated(player.getUniqueId())) {
                 plugin.getProxy().getScheduler().schedule(plugin, () -> {
                     if (!plugin.getAuthManager().isAuthenticated(player.getUniqueId())) {
-                        player.disconnect(new TextComponent(
+                        player.disconnect(TextComponent.fromLegacyText(
                             plugin.getLanguageManager().getMessage("auth.not-authenticated")
                         ));
                     }
@@ -125,11 +125,11 @@ public class BungeePlayerListener implements Listener {
             }
             
             if (plugin.getAuthManager().completeRegistration(player.getUniqueId(), token)) {
-                player.sendMessage(new TextComponent(
+                player.sendMessage(TextComponent.fromLegacyText(
                     plugin.getLanguageManager().getMessage("command.register.success")
                 ));
             } else {
-                player.sendMessage(new TextComponent(
+                player.sendMessage(TextComponent.fromLegacyText(
                     plugin.getLanguageManager().getMessage("command.register.invalid-token")
                 ));
                 plugin.getAuthManager().cancelRegistration(player.getUniqueId());
@@ -172,14 +172,14 @@ public class BungeePlayerListener implements Listener {
             
             if (plugin.getAuthManager().verifyCode(player.getUniqueId(), code)) {
                 plugin.getAuthManager().setAwaitingCodeInput(player.getUniqueId(), false);
-                player.sendMessage(new TextComponent(
+                player.sendMessage(TextComponent.fromLegacyText(
                     plugin.getLanguageManager().getMessage("auth.success")
                 ));
                 
                 // Send AUTHED state to downstream servers
                 plugin.sendAuthState(player, true);
             } else {
-                player.disconnect(new TextComponent(
+                player.disconnect(TextComponent.fromLegacyText(
                     plugin.getLanguageManager().getMessage("auth.invalid-code")
                 ));
             }

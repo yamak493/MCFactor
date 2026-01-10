@@ -40,9 +40,7 @@ public class VelocityPlayerListener {
             plugin.getAuthManager().setAwaitingCodeInput(player.getUniqueId(), true);
             
             // Send message
-            player.sendMessage(Component.text(
-                plugin.getLanguageManager().getMessage("auth.enter-code")
-            ));
+            player.sendMessage(plugin.getLanguageManager().getComponent("auth.enter-code"));
         }
         
         // App authentication mode
@@ -51,9 +49,7 @@ public class VelocityPlayerListener {
                 plugin.getServer().getScheduler()
                     .buildTask(plugin, () -> {
                         if (!plugin.getAuthManager().isAuthenticated(player.getUniqueId())) {
-                            player.disconnect(Component.text(
-                                plugin.getLanguageManager().getMessage("auth.not-authenticated")
-                            ));
+                            player.disconnect(plugin.getLanguageManager().getComponent("auth.not-authenticated"));
                         }
                     })
                     .delay(1, TimeUnit.SECONDS)
@@ -93,13 +89,9 @@ public class VelocityPlayerListener {
             plugin.getLogger().info("[MCFactor] Player " + player.getUsername() + " attempting token registration");
             
             if (plugin.getAuthManager().completeRegistration(player.getUniqueId(), token)) {
-                player.sendMessage(Component.text(
-                    plugin.getLanguageManager().getMessage("command.register.success")
-                ));
+                player.sendMessage(plugin.getLanguageManager().getComponent("command.register.success"));
             } else {
-                player.sendMessage(Component.text(
-                    plugin.getLanguageManager().getMessage("command.register.invalid-token")
-                ));
+                player.sendMessage(plugin.getLanguageManager().getComponent("command.register.invalid-token"));
                 plugin.getAuthManager().cancelRegistration(player.getUniqueId());
             }
             return;
@@ -113,17 +105,11 @@ public class VelocityPlayerListener {
             
             if (plugin.getAuthManager().verifyCode(player.getUniqueId(), code)) {
                 plugin.getAuthManager().setAwaitingCodeInput(player.getUniqueId(), false);
-                player.sendMessage(Component.text(
-                    plugin.getLanguageManager().getMessage("auth.success")
-                ));
-                
-                // Send AUTHED state to downstream servers
+                player.sendMessage(plugin.getLanguageManager().getComponent("auth.success"));
                 plugin.sendAuthState(player, true);
             } else {
                 // Keep player in awaiting state, but disconnect on wrong code as before
-                player.disconnect(Component.text(
-                    plugin.getLanguageManager().getMessage("auth.invalid-code")
-                ));
+                player.disconnect(plugin.getLanguageManager().getComponent("auth.invalid-code"));
             }
         }
     }
