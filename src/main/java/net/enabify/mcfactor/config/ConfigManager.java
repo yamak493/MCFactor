@@ -90,6 +90,9 @@ public class ConfigManager implements MCFactorConfig {
         config.put("server-id", "");
         config.put("secret-key", "");
         
+        // Debugging (prints additional debug information when true)
+        config.put("debug", false);
+        
         saveConfig();
     }
     
@@ -175,6 +178,11 @@ public class ConfigManager implements MCFactorConfig {
     @Override
     public void reload() {
         loadConfig();
+    }
+
+    @Override
+    public boolean isDebug() {
+        return getBooleanValue("debug", false);
     }
     
     // Helper methods

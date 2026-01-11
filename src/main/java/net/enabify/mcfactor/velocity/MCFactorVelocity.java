@@ -115,7 +115,7 @@ public class MCFactorVelocity implements MCFactorPlugin {
     }
     
     private void registerServer() {
-        logger.info("Registering server with backend API...");
+logDebug("Registering server with backend API...");
         
         try {
             String type = configManager.isAppAuthentication() ? "app" : "code";
@@ -132,8 +132,8 @@ public class MCFactorVelocity implements MCFactorPlugin {
                 configManager.setSecretKey(secretKey);
                 configManager.saveConfig();
                 
-                logger.info("Server registered successfully!");
-                logger.info("Server ID: " + serverId);
+                log("Server registered successfully!");
+                logDebug("Server ID: " + serverId);
             } else {
                 logger.error("Failed to register server: Invalid response");
             }
@@ -153,7 +153,7 @@ public class MCFactorVelocity implements MCFactorPlugin {
                 this
             );
             restApiServer.start();
-            logger.info("REST API server started on " + 
+            logDebug("REST API server started on " + 
                 configManager.getRestApiHost() + ":" + configManager.getRestApiPort());
         } catch (Exception e) {
             logger.error("Failed to start REST API server", e);
@@ -215,6 +215,13 @@ public class MCFactorVelocity implements MCFactorPlugin {
     public void log(String message) {
         logger.info(message);
     }
+
+    @Override
+    public void logDebug(String message) {
+        if (configManager != null && configManager.isDebug()) {
+            logger.info(message);
+        }
+    }
     
     @Override
     public void logError(String message, Exception e) {
@@ -241,7 +248,7 @@ public class MCFactorVelocity implements MCFactorPlugin {
                 message.toBytes()
             );
             
-            logger.info("Sent auth state to server for player " + player.getUsername() +
+            logDebug("Sent auth state to server for player " + player.getUsername() +
                        ": " + (authenticated ? "AUTHED" : "UNAUTHED"));
         } catch (Exception e) {
             logger.warn("Failed to send auth state: " + e.getMessage());

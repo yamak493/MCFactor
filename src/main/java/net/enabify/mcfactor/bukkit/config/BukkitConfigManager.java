@@ -81,6 +81,9 @@ public class BukkitConfigManager implements MCFactorConfig {
         config.set("server-id", "");
         config.set("secret-key", "");
         
+        // Debugging (prints additional debug information when true)
+        config.set("debug", false);
+        
         saveConfig();
     }
     
@@ -162,5 +165,10 @@ public class BukkitConfigManager implements MCFactorConfig {
     @Override
     public void reload() {
         config = YamlConfiguration.loadConfiguration(configFile);
+    }
+
+    @Override
+    public boolean isDebug() {
+        return config.getBoolean("debug", false);
     }
 }

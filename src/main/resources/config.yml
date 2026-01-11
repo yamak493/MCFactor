@@ -42,3 +42,5 @@ server-id: ''
 # This is automatically generated on the first run. DO NOT CHANGE.
 secret-key: ''
 
+# Enable debug logging for troubleshooting.
+debug: false

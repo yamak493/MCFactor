@@ -48,7 +48,7 @@ public class MCFactorBukkit extends JavaPlugin implements MCFactorPlugin, Plugin
         
         if (isProxyMode) {
             // Mode 3: Downstream server behind proxy - only handle freeze control
-            getLogger().info("Running in Proxy Mode (downstream server) - freeze control only");
+            logDebug("Running in Proxy Mode (downstream server) - freeze control only");
             
             // Register Plugin Messaging Channel to receive auth state from proxy
             getServer().getMessenger().registerIncomingPluginChannel(this, MessagingConstants.CHANNEL_NAME, this);
@@ -56,12 +56,12 @@ public class MCFactorBukkit extends JavaPlugin implements MCFactorPlugin, Plugin
             // Register listeners for freeze control
             getServer().getPluginManager().registerEvents(new PlayerListener(this), this);
             
-            getLogger().info("MCFactor has been enabled in Proxy Mode!");
+            log("MCFactor has been enabled in Proxy Mode!");
             return;
         }
         
         // Mode 1: Standalone server - full authentication and freeze control
-        getLogger().info("Running in Standalone Mode - full authentication");
+        logDebug("Running in Standalone Mode - full authentication");
         
         // Register server if needed
         if (configManager.getServerId().isEmpty() || configManager.getSecretKey().isEmpty()) {
@@ -110,7 +110,7 @@ public class MCFactorBukkit extends JavaPlugin implements MCFactorPlugin, Plugin
     }
     
     private void registerServer() {
-        getLogger().info("Registering server with backend API...");
+        logDebug("Registering server with backend API...");
         
         try {
             String type = configManager.isAppAuthentication() ? "app" : "code";
@@ -126,8 +126,8 @@ public class MCFactorBukkit extends JavaPlugin implements MCFactorPlugin, Plugin
                 configManager.setServerId(serverId);
                 configManager.setSecretKey(secretKey);
                 
-                getLogger().info("Server registered successfully!");
-                getLogger().info("Server ID: " + serverId);
+                log("Server registered successfully!");
+                logDebug("Server ID: " + serverId);
             } else {
                 getLogger().severe("Failed to register server: Invalid response");
                 getServer().getPluginManager().disablePlugin(this);
@@ -171,7 +171,7 @@ public class MCFactorBukkit extends JavaPlugin implements MCFactorPlugin, Plugin
             }
             
             if (isSuccess) {
-                getLogger().info("Server information updated successfully!");
+                logDebug("Server information updated successfully!");
             } else {
                 getLogger().severe("Failed to update server information");
                 getServer().getPluginManager().disablePlugin(this);
@@ -194,7 +194,7 @@ public class MCFactorBukkit extends JavaPlugin implements MCFactorPlugin, Plugin
                 this
             );
             restApiServer.start();
-            getLogger().info("REST API server started on port " + configManager.getRestApiPort());
+            logDebug("REST API server started on port " + configManager.getRestApiPort());
             
             // Test the REST API endpoint
             testRestApiEndpoint();
@@ -211,12 +211,12 @@ public class MCFactorBukkit extends JavaPlugin implements MCFactorPlugin, Plugin
             String host = configManager.getRestApiHost();
             int port = configManager.getRestApiPort();
             
-            getLogger().info("Testing REST API endpoint at " + host + ":" + port + "...");
+            logDebug("Testing REST API endpoint at " + host + ":" + port + "...");
             
             boolean isWorking = ApiClient.testRestApiEndpoint(host, port);
             
             if (isWorking) {
-                getLogger().info("REST API endpoint test successful!");
+                logDebug("REST API endpoint test successful!");
             } else {
                 getLogger().severe("REST API endpoint test failed!");
                 getLogger().severe("The API server may not be accessible from " + host + ":" + port);
@@ -249,6 +249,14 @@ public class MCFactorBukkit extends JavaPlugin implements MCFactorPlugin, Plugin
     public void log(String message) {
         getLogger().info(message);
     }
+
+    @Override
+    public void logDebug(String message) {
+        // Only output when debug flag is enabled
+        if (configManager != null && configManager.isDebug()) {
+            getLogger().info(message);
+        }
+    }
     
     @Override
     public void logError(String message, Exception e) {
@@ -275,7 +283,7 @@ public class MCFactorBukkit extends JavaPlugin implements MCFactorPlugin, Plugin
         try {
             AuthStateMessage authState = AuthStateMessage.fromBytes(message);
             
-            getLogger().info("Received auth state for player " + authState.getPlayerUuid() + 
+            logDebug("Received auth state for player " + authState.getPlayerUuid() + 
                            ": " + (authState.isAuthenticated() ? "AUTHED" : "UNAUTHED"));
             
             // Find the player on this server
@@ -291,7 +299,7 @@ public class MCFactorBukkit extends JavaPlugin implements MCFactorPlugin, Plugin
                 if (freezeManager.isFrozen(targetPlayer.getUniqueId())) {
                     FoliaScheduler.runTask(this, targetPlayer, () -> {
                         freezeManager.unfreezePlayer(targetPlayer);
-                        getLogger().info("Unfroze player " + targetPlayer.getName());
+                        logDebug("Unfroze player " + targetPlayer.getName());
                     });
                 }
             } else {
@@ -299,7 +307,7 @@ public class MCFactorBukkit extends JavaPlugin implements MCFactorPlugin, Plugin
                 if (!freezeManager.isFrozen(targetPlayer.getUniqueId())) {
                     FoliaScheduler.runTask(this, targetPlayer, () -> {
                         freezeManager.freezePlayer(targetPlayer);
-                        getLogger().info("Froze player " + targetPlayer.getName());
+                        logDebug("Froze player " + targetPlayer.getName());
                     });
                 }
             }

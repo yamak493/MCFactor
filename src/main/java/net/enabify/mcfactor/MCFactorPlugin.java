@@ -16,5 +16,6 @@ public interface MCFactorPlugin {
     AuthenticationManager getAuthManager();
     File getDataFolder();
     void log(String message);
+    void logDebug(String message);
     void logError(String message, Exception e);
 }

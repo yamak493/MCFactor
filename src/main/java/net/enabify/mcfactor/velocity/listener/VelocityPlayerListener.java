@@ -86,7 +86,7 @@ public class VelocityPlayerListener {
         if (plugin.getAuthManager().hasPendingRegistration(player.getUniqueId())) {
             event.setResult(PlayerChatEvent.ChatResult.denied());
             String token = event.getMessage().trim();
-            plugin.getLogger().info("[MCFactor] Player " + player.getUsername() + " attempting token registration");
+            if (plugin.getConfigManager().isDebug()) plugin.logDebug("[MCFactor] Player " + player.getUsername() + " attempting token registration");
             
             if (plugin.getAuthManager().completeRegistration(player.getUniqueId(), token)) {
                 player.sendMessage(plugin.getLanguageManager().getComponent("command.register.success"));
@@ -101,7 +101,7 @@ public class VelocityPlayerListener {
         if (plugin.getAuthManager().isAwaitingCodeInput(player.getUniqueId())) {
             event.setResult(PlayerChatEvent.ChatResult.denied());
             String code = event.getMessage().trim();
-            plugin.getLogger().info("[MCFactor] Player " + player.getUsername() + " attempting code authentication");
+            if (plugin.getConfigManager().isDebug()) plugin.logDebug("[MCFactor] Player " + player.getUsername() + " attempting code authentication");
             
             if (plugin.getAuthManager().verifyCode(player.getUniqueId(), code)) {
                 plugin.getAuthManager().setAwaitingCodeInput(player.getUniqueId(), false);

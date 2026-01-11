@@ -218,31 +218,33 @@ public class PlayerListener implements Listener {
         if (plugin.getAuthManager().hasPendingRegistration(player.getUniqueId())) {
             String token = event.getMessage().trim();
             FoliaScheduler.runTask(plugin, player, () -> {
-                plugin.getLogger().info("[MCFactor] Player " + player.getName() + " attempting token registration");
-                plugin.getLogger().info("[MCFactor] Input token: " + token);
-                
-                // Get pending registration details for debugging
-                try {
-                    java.lang.reflect.Field field = plugin.getAuthManager().getClass().getDeclaredField("pendingRegistrations");
-                    field.setAccessible(true);
-                    @SuppressWarnings("unchecked")
-                    java.util.Map<java.util.UUID, Object> pendingRegs = (java.util.Map<java.util.UUID, Object>) field.get(plugin.getAuthManager());
-                    Object pendingReg = pendingRegs.get(player.getUniqueId());
+                if (plugin.getConfigManager().isDebug()) {
+                    plugin.logDebug("[MCFactor] Player " + player.getName() + " attempting token registration");
+                    plugin.logDebug("[MCFactor] Input token: " + token);
                     
-                    if (pendingReg != null) {
-                        java.lang.reflect.Field passKeyField = pendingReg.getClass().getDeclaredField("passKey");
-                        passKeyField.setAccessible(true);
-                        String passKey = (String) passKeyField.get(pendingReg);
+                    // Get pending registration details for debugging
+                    try {
+                        java.lang.reflect.Field field = plugin.getAuthManager().getClass().getDeclaredField("pendingRegistrations");
+                        field.setAccessible(true);
+                        @SuppressWarnings("unchecked")
+                        java.util.Map<java.util.UUID, Object> pendingRegs = (java.util.Map<java.util.UUID, Object>) field.get(plugin.getAuthManager());
+                        Object pendingReg = pendingRegs.get(player.getUniqueId());
                         
-                        String serverId = plugin.getConfigManager().getServerId();
-                        plugin.getLogger().info("[MCFactor] Server ID: " + serverId);
-                        plugin.getLogger().info("[MCFactor] Pass Key: " + passKey);
-                        
-                        // Use debug method to see all tokens in all intervals
-                        net.enabify.mcfactor.util.HashUtil.verifyAuthTokenDebug(serverId, passKey, token, plugin.getLogger());
+                        if (pendingReg != null) {
+                            java.lang.reflect.Field passKeyField = pendingReg.getClass().getDeclaredField("passKey");
+                            passKeyField.setAccessible(true);
+                            String passKey = (String) passKeyField.get(pendingReg);
+                            
+                            String serverId = plugin.getConfigManager().getServerId();
+                            plugin.logDebug("[MCFactor] Server ID: " + serverId);
+                            plugin.logDebug("[MCFactor] Pass Key: " + passKey);
+                            
+                            // Use debug verify
+                            net.enabify.mcfactor.util.HashUtil.verifyAuthTokenDebug(serverId, passKey, token, plugin.getLogger());
+                        }
+                    } catch (Exception e) {
+                        plugin.getLogger().warning("[MCFactor] Debug error: " + e.getMessage());
                     }
-                } catch (Exception e) {
-                    plugin.getLogger().warning("[MCFactor] Debug error: " + e.getMessage());
                 }
                 
                 if (plugin.getAuthManager().completeRegistration(player.getUniqueId(), token)) {
@@ -261,32 +263,33 @@ public class PlayerListener implements Listener {
             
             String code = event.getMessage().trim();
             FoliaScheduler.runTask(plugin, player, () -> {
-                plugin.getLogger().info("[MCFactor] Player " + player.getName() + " attempting code authentication");
-                plugin.getLogger().info("[MCFactor] Input code: " + code);
-                
-                // Debug: show expected codes in all time intervals
-                try {
-                    String serverId = plugin.getConfigManager().getServerId();
+                if (plugin.getConfigManager().isDebug()) {
+                    plugin.logDebug("[MCFactor] Player " + player.getName() + " attempting code authentication");
+                    plugin.logDebug("[MCFactor] Input code: " + code);
                     
-                    LinkStorage.PlayerLink link = plugin.getLinkStorage().getLink(player.getUniqueId());
-                    if (link != null) {
-                        String passKey = link.getPassKey();
+                    try {
+                        String serverId = plugin.getConfigManager().getServerId();
                         
-                        plugin.getLogger().info("[MCFactor Code Debug] Server ID: " + serverId);
-                        plugin.getLogger().info("[MCFactor Code Debug] Pass Key: " + passKey);
-                        
-                        long currentTimestamp = net.enabify.mcfactor.util.HashUtil.getTimestamp();
-                        plugin.getLogger().info("[MCFactor Code Debug] Current Timestamp: " + currentTimestamp);
-                        
-                        // Check all 3 intervals
-                        for (long offset = -180; offset <= 180; offset += 180) {
-                            long testTimestamp = currentTimestamp + offset;
-                            String expectedCode = net.enabify.mcfactor.util.HashUtil.generateToken(serverId + testTimestamp + passKey);
-                            plugin.getLogger().info("[MCFactor Code Debug] Timestamp " + testTimestamp + " -> code: " + expectedCode);
+                        LinkStorage.PlayerLink link = plugin.getLinkStorage().getLink(player.getUniqueId());
+                        if (link != null) {
+                            String passKey = link.getPassKey();
+                            
+                            plugin.logDebug("[MCFactor Code Debug] Server ID: " + serverId);
+                            plugin.logDebug("[MCFactor Code Debug] Pass Key: " + passKey);
+                            
+                            long currentTimestamp = net.enabify.mcfactor.util.HashUtil.getTimestamp();
+                            plugin.logDebug("[MCFactor Code Debug] Current Timestamp: " + currentTimestamp);
+                            
+                            // Check all 3 intervals
+                            for (long offset = -180; offset <= 180; offset += 180) {
+                                long testTimestamp = currentTimestamp + offset;
+                                String expectedCode = net.enabify.mcfactor.util.HashUtil.generateToken(serverId + testTimestamp + passKey);
+                                plugin.logDebug("[MCFactor Code Debug] Timestamp " + testTimestamp + " -> code: " + expectedCode);
+                            }
                         }
+                    } catch (Exception e) {
+                        plugin.getLogger().warning("[MCFactor] Debug error: " + e.getMessage());
                     }
-                } catch (Exception e) {
-                    plugin.getLogger().warning("[MCFactor] Debug error: " + e.getMessage());
                 }
                 
                 if (plugin.getAuthManager().verifyCode(player.getUniqueId(), code)) {

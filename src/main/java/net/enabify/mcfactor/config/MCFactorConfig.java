@@ -26,4 +26,6 @@ public interface MCFactorConfig {
     void saveConfig();
 
     void reload();
+
+    boolean isDebug();
 }

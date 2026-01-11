@@ -84,7 +84,7 @@ public class MCFactorBungee extends Plugin implements MCFactorPlugin {
     }
     
     private void registerServer() {
-        getLogger().info("Registering server with backend API...");
+        logDebug("Registering server with backend API...");
         
         try {
             String type = configManager.isAppAuthentication() ? "app" : "code";
@@ -100,8 +100,8 @@ public class MCFactorBungee extends Plugin implements MCFactorPlugin {
                 configManager.setServerId(serverId);
                 configManager.setSecretKey(secretKey);
                 
-                getLogger().info("Server registered successfully!");
-                getLogger().info("Server ID: " + serverId);
+                log("Server registered successfully!");
+                logDebug("Server ID: " + serverId);
             } else {
                 getLogger().severe("Failed to register server: Invalid response");
             }
@@ -140,7 +140,7 @@ public class MCFactorBungee extends Plugin implements MCFactorPlugin {
             }
             
             if (isSuccess) {
-                getLogger().info("Server information updated successfully!");
+                logDebug("Server information updated successfully!");
             } else {
                 getLogger().severe("Failed to update server information");
             }
@@ -161,7 +161,7 @@ public class MCFactorBungee extends Plugin implements MCFactorPlugin {
                 this
             );
             restApiServer.start();
-            getLogger().info("REST API server started on port " + configManager.getRestApiPort());
+            logDebug("REST API server started on port " + configManager.getRestApiPort());
             
             // Test the REST API endpoint
             testRestApiEndpoint();
@@ -177,12 +177,12 @@ public class MCFactorBungee extends Plugin implements MCFactorPlugin {
             String host = configManager.getRestApiHost();
             int port = configManager.getRestApiPort();
             
-            getLogger().info("Testing REST API endpoint at " + host + ":" + port + "...");
+            logDebug("Testing REST API endpoint at " + host + ":" + port + "...");
             
             boolean isWorking = ApiClient.testRestApiEndpoint(host, port);
             
             if (isWorking) {
-                getLogger().info("REST API endpoint test successful!");
+                logDebug("REST API endpoint test successful!");
             } else {
                 getLogger().severe("REST API endpoint test failed!");
                 getLogger().severe("The API server may not be accessible from " + host + ":" + port);
@@ -215,6 +215,13 @@ public class MCFactorBungee extends Plugin implements MCFactorPlugin {
     public void log(String message) {
         getLogger().info(message);
     }
+
+    @Override
+    public void logDebug(String message) {
+        if (configManager != null && configManager.isDebug()) {
+            getLogger().info(message);
+        }
+    }
     
     @Override
     public void logError(String message, Exception e) {
@@ -241,7 +248,7 @@ public class MCFactorBungee extends Plugin implements MCFactorPlugin {
             // Send the plugin message
             server.sendData(MessagingConstants.CHANNEL_NAME, message.toBytes());
             
-            getLogger().info("Sent auth state to server for player " + player.getName() +
+            logDebug("Sent auth state to server for player " + player.getName() +
                            ": " + (authenticated ? "AUTHED" : "UNAUTHED"));
         } catch (Exception e) {
             getLogger().warning("Failed to send auth state: " + e.getMessage());
