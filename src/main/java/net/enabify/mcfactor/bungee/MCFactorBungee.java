@@ -172,6 +172,11 @@ public class MCFactorBungee extends Plugin implements MCFactorPlugin {
     }
     
     private void testRestApiEndpoint() {
+        // Only test if debug is enabled
+        if (!configManager.isDebug()) {
+            return;
+        }
+        
         // Wait a moment for the server to fully start
         getProxy().getScheduler().schedule(this, () -> {
             String host = configManager.getRestApiHost();

@@ -206,6 +206,11 @@ public class MCFactorBukkit extends JavaPlugin implements MCFactorPlugin, Plugin
     }
     
     private void testRestApiEndpoint() {
+        // Only test if debug is enabled
+        if (!configManager.isDebug()) {
+            return;
+        }
+        
         // Wait a moment for the server to fully start
         FoliaScheduler.runGlobalTaskLater(this, () -> {
             String host = configManager.getRestApiHost();
