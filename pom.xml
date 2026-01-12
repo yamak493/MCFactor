@@ -38,6 +38,15 @@
         <configuration>
           <source>${java.version}</source>
           <target>${java.version}</target>
+          <encoding>UTF-8</encoding>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>3.2.0</version>
+        <configuration>
+          <encoding>UTF-8</encoding>
         </configuration>
       </plugin>
       <plugin>
@@ -117,8 +126,12 @@
                 <option>-allowaccessmodification</option>
                 
                 <!-- リソースファイル内のクラス名参照を更新 -->
-                <option>-adaptresourcefilenames **.yml,**.json</option>
-                <option>-adaptresourcefilecontents **.yml,**.json,META-INF/MANIFEST.MF</option>
+                <!-- 
+                  言語ファイル (lang/*.yml) 等はクラス名を含まないため、
+                  ProGuardによる書き換え処理から除外することで文字化けを防止します。
+                -->
+                <option>-adaptresourcefilenames plugin.yml,bungee.yml,velocity-plugin.json</option>
+                <option>-adaptresourcefilecontents plugin.yml,bungee.yml,velocity-plugin.json,META-INF/MANIFEST.MF</option>
 
                 <!-- メインクラスとエントリポイントの保持 -->
                 <option>-keep class net.enabify.mcfactor.MCFactor$* { *; }</option>
