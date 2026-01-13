@@ -1,6 +1,6 @@
 name: MCFactor
 version: '${project.version}'
-main: net.enabify.mcfactor.MCFactor$Bukkit
+main: net.enabify.mcfactor.bukkit.MCFactorBukkit
 api-version: 1.13
 author: Enabify
 description: Two-factor authentication plugin for Minecraft servers

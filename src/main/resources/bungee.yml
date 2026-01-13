@@ -1,5 +1,5 @@
 name: MCFactor
 version: '${project.version}'
-main: net.enabify.mcfactor.MCFactor$Bungee
+main: net.enabify.mcfactor.bungee.MCFactorBungee
 author: Enabify
 description: Two-factor authentication plugin for BungeeCord proxies
