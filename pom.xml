@@ -14,20 +14,7 @@
   <properties>
     <java.version>1.8</java.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <proguard.version>7.3.2</proguard.version>
   </properties>
-
-  <profiles>
-    <profile>
-      <id>java8</id>
-      <activation>
-        <jdk>1.8</jdk>
-      </activation>
-      <properties>
-        <proguard.lib>${java.home}/lib/rt.jar</proguard.lib>
-      </properties>
-    </profile>
-  </profiles>
 
   <build>
     <plugins>
@@ -38,15 +25,6 @@
         <configuration>
           <source>${java.version}</source>
           <target>${java.version}</target>
-          <encoding>UTF-8</encoding>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-resources-plugin</artifactId>
-        <version>3.2.0</version>
-        <configuration>
-          <encoding>UTF-8</encoding>
         </configuration>
       </plugin>
       <plugin>
@@ -80,89 +58,6 @@
             </configuration>
           </execution>
         </executions>
-      </plugin>
-      <plugin>
-        <groupId>com.github.wvengen</groupId>
-        <artifactId>proguard-maven-plugin</artifactId>
-        <version>2.7.0</version>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>proguard</goal>
-            </goals>
-            <configuration>
-              <proguardVersion>7.3.2</proguardVersion>
-              <injar>${project.build.finalName}.jar</injar>
-              <outjar>${project.build.finalName}.jar</outjar>
-              <obfuscate>true</obfuscate>
-              <includeDependency>true</includeDependency>
-              <options>
-                <!-- 警告を無視する（Minecraft APIなどは依存関係が複雑なため） -->
-                <option>-ignorewarnings</option>
-                <option>-dontwarn org.bukkit.**</option>
-                <option>-dontwarn net.md_5.bungee.**</option>
-                <option>-dontwarn com.velocitypowered.**</option>
-                <option>-dontwarn com.google.gson.**</option>
-                <option>-dontwarn org.yaml.snakeyaml.**</option>
-                <option>-dontwarn org.bouncycastle.**</option>
-
-                <!--
-                圧縮と最適化を無効にする
-                <option>-dontshrink</option>
-                <option>-dontoptimize</option>
-                -->
-
-                <!-- 難読化を有効にする -->
-                <option>-useuniqueclassmembernames</option>
-                <option>-renamesourcefileattribute SourceFile</option>
-                <option>-keepattributes Exceptions,InnerClasses,Signature,Deprecated,!SourceFile,!LineNumberTable,*Annotation*,EnclosingMethod</option>
-
-                <!--
-                さらに強力に難読化する
-                [-overloadaggressively]は不具合を起こすため使用禁止。名前の衝突の原因になる。
-                -->
-                <option>-repackageclasses ''</option>
-                <option>-allowaccessmodification</option>
-                
-                <!-- リソースファイル内のクラス名参照を更新 -->
-                <!-- 
-                  言語ファイル (lang/*.yml) 等はクラス名を含まないため、
-                  ProGuardによる書き換え処理から除外することで文字化けを防止します。
-                -->
-                <option>-adaptresourcefilenames plugin.yml,bungee.yml,velocity-plugin.json</option>
-                <option>-adaptresourcefilecontents plugin.yml,bungee.yml,velocity-plugin.json,META-INF/MANIFEST.MF</option>
-
-                <!-- メインクラスとエントリポイントの保持 -->
-                <option>-keep class net.enabify.mcfactor.MCFactor$* { *; }</option>
-                <option>-keep class net.enabify.mcfactor.velocity.MCFactorVelocity { *; }</option>
-                <option>-keepclassmembers class net.enabify.mcfactor.MCFactor$* { *; }</option>
-                <option>-keepclassmembers class net.enabify.mcfactor.velocity.MCFactorVelocity { *; }</option>
-                
-                <!-- APIの保持（ユーザー指定：外部ライブラリやAPIは難読化しない） -->
-                <option>-keep class net.enabify.mcfactor.api.** { *; }</option>
-                <option>-keepclassmembers class net.enabify.mcfactor.api.** { *; }</option>
-                
-                <!-- 本プラグイン以外のクラス（外部ライブラリなど）は難読化しない -->
-                <option>-keep class !net.enabify.mcfactor.** { *; }</option>
-
-                <!-- プラグインインターフェースの実装クラスを保持 -->
-                <option>-keep class * implements net.enabify.mcfactor.MCFactorPlugin { *; }</option>
-                <option>-keepclassmembers class * implements net.enabify.mcfactor.MCFactorPlugin { *; }</option>
-              </options>
-              <libs>
-                <lib>${proguard.lib}</lib>
-              </libs>
-            </configuration>
-          </execution>
-        </executions>
-        <dependencies>
-          <dependency>
-            <groupId>com.guardsquare</groupId>
-            <artifactId>proguard-base</artifactId>
-            <version>7.3.2</version>
-          </dependency>
-        </dependencies>
       </plugin>
     </plugins>
     <resources>
