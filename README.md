@@ -1,143 +1,83 @@
-# MCFactor - Minecraft Two Factor Authentication Plugin
+# MCFactor: Next-Gen 2FA for Minecraft Servers
+![MCFactor Banner](https://cdn.modrinth.com/data/cached_images/c4857bbc14abf3431bb12b084414ebe166dd7d3f.png)
+**Secure your players. Protect your server.**
 
-MCFactorは、Minecraftサーバーに2段階認証機能を追加するプラグインです。専用のFlutterアプリケーションと連携して、サーバーのセキュリティを強化します。
+**MCFactor** is a comprehensive Two-Factor Authentication (2FA) solution that pairs your Minecraft server with a dedicated, modern mobile application (iOS & Android). It is designed to prevent unauthorized logins—whether from hackers or just siblings sharing a computer.
 
-## 特徴
+Unlike traditional map-based Captchas or text-based passwords, MCFactor uses **SHA3-256 encryption** and **time-based tokens** synced with a mobile device to ensure top-tier security without ruining the gameplay experience.
 
-- **2段階認証**: プレイヤーのアカウントをスマートフォンアプリで保護
-- **複数のプラットフォーム対応**: Bukkit、Spigot、Paper、Folia、BungeeCord、Velocity対応
-- **2つの認証モード**:
-  - **コード認証**: プレイヤーがサーバー参加時にコードを入力
-  - **アプリ認証**: アプリから自動的に認証をリクエスト
-- **多言語対応**: 11言語に対応（英語、日本語、中国語、スペイン語、アラビア語、フランス語、ロシア語、ポルトガル語、インドネシア語、ドイツ語、ヒンディー語）
-- **セキュアな暗号化**: SHA3-256ハッシュアルゴリズムを使用
-- **タイムベースド**: 3分ごとに更新されるトークン
+### 📱 The Companion App
 
-## インストール
+This plugin requires players to use the **MCFactor** app.
 
-1. プラグインJARファイルをサーバーの`plugins`フォルダに配置
-2. サーバーを起動（初回起動時に自動的にServer IDとSecret Keyが発行されます）
-3. 必要に応じて`plugins/MCFactor/config.yml`を編集
-4. サーバーを再起動
+* **iOS / Android Supported**
+* **Modern UI:** Dark/Light mode.
+* **Secure:** Tokens refresh every 3 minutes.
 
-## 設定
-
-`config.yml`の主な設定項目:
-
-```yaml
-# プラグインの有効/無効
-enabled: true
-
-# 言語設定 (en, ja, zh, es, ar, fr, ru, pt, id, de, hi)
-language: en
-
-# コード認証モード（サーバー参加時にコード入力）
-code-authentication: true
-
-# アプリ認証モード（アプリからREST APIで認証）
-app-authentication: false
-
-# REST API設定（アプリ認証使用時）
-rest-api:
-  host: 0.0.0.0
-  port: 25566
-
-# Server ID（自動生成、変更禁止）
-server-id: ""
-
-# Secret Key（自動生成、変更禁止）
-secret-key: ""
-
-# Config Version
-config-version: 1
-```
-
-## コマンド
-
-| コマンド | 説明 | 権限 |
-|---------|------|------|
-| `/2fa <appkey>` | アプリキーを使用してアカウントをリンク | なし |
-| `/2fa` | アカウントのリンクを解除 | なし |
-| `/2fa help` | ヘルプを表示 | なし |
-| `/2fa disconnect <player>` | プレイヤーのリンクを強制解除 | `mcfactor.admin` |
-
-## 使い方
-
-### プレイヤー側
-
-1. スマートフォンにMCFactorアプリをインストール
-2. アプリで新しいサーバーを追加（6桁のアプリキーが生成されます）
-3. Minecraftサーバーで`/2fa <アプリキー>`を実行
-4. アプリに表示されるトークンをサーバーのチャットに入力
-5. 登録完了！
-
-### 管理者側
-
-#### コード認証モードの場合
-- プレイヤーはサーバー参加時にアプリに表示されるコードを入力する必要があります
-- プレイヤーは一時的に動きが制限され、コード入力後に解放されます
-
-#### アプリ認証モードの場合
-- プレイヤーがサーバーに参加する前に、アプリで「認証する」ボタンをタップ
-- アプリがサーバーのREST APIにリクエストを送信
-- 認証が成功すると、5分間サーバーに参加可能
-
-## セキュリティ
-
-- すべての認証トークンはSHA3-256でハッシュ化
-- タイムスタンプベースで3分ごとにトークンが更新
-- REST APIはレート制限付き（10秒に1回まで）
-- 各プレイヤーのApp KeyとPass Keyは暗号化されて保存
-
-## 対応プラットフォーム
-
-- Bukkit 1.13+
-- Spigot 1.13+
-- Paper 1.13+
-- Folia（非同期対応）
-- BungeeCord
-- Velocity（予定）
-- Sponge（予定）
-- Fabric（予定）
-- Forge（予定）
-
-## ビルド
-
-```bash
-mvn clean package
-```
-
-ビルドされたJARファイルは`target/MCFactor-1.0-SNAPSHOT.jar`に出力されます。
-
-## 技術仕様
-
-- **Java**: 8+
-- **ハッシュアルゴリズム**: SHA3-256
-- **トークン長**: 6文字
-- **トークン有効期間**: 3分
-- **認証有効期間**: 5分（アプリ認証モード）
-
-## バックエンドAPI
-
-このプラグインは以下のバックエンドAPIエンドポイントを使用します:
-
-- `POST /register.php` - サーバー登録
-- `POST /update.php` - サーバー情報更新
-- `POST /info.php` - サーバー情報取得
-- `POST /temp.php` - 一時登録
-
-## ライセンス
-
-このプロジェクトは非公開です。
-
-## サポート
-
-問題が発生した場合は、GitHub Issuesまたは公式サポートチャンネルでご報告ください。
-
-## 開発者
-
-Enabify - https://enabify.net
+![App Screens](https://cdn.modrinth.com/data/cached_images/46c3ccf9085ae0fef8a419de3e7014cb26de7c5b.png)
 
 ---
 
-**注意**: このプラグインを使用するには、MCFactorバックエンドサーバーとFlutterアプリケーションが必要です。
+## ✨ Features
+
+* **Folia & Paper & Spigot support:** Fully supports modern server software, including asynchronous processing on **Folia**.
+* **BEDROCK Support (Geyser):** Bedrock players are also supported.
+* **Code Auth:** The player enters a 6-digit dynamic code from the app into the game chat.
+* **App Auth (Seamless):** If enabled, the server opens a local REST API port. Players simply tap "Authenticate" on their phone, and the server logs them in automatically!
+* **Login sessions are frozen:** Players cannot move, break blocks, or interact until authenticated.
+
+
+* **Global Language Support:** 11 languages including English, Japanese, Spanish, Chinese, and Hindi.
+
+---
+
+## 🛠️ Install
+
+1. **Install:** Drop the `MCFactor-x.x.x-SNAPSHOT.jar` into your plugins folder.
+2. **Auto-Setup:** On the first launch, the plugin automatically connects to the backend API to retrieve a unique **Server ID** and **Secret Key**. No manual database setup is required!
+
+---
+
+## 📚 Wiki
+https://github.com/yamak493/MCFactor-Plugin/wiki
+
+---
+
+## ⚙️ Configuration
+
+This plugin is mostly self-setting up.:
+
+* **`auth-method`**: Choose between `code` (manual entry) or `app` (push-only).
+* **`port`**: Define the port for the REST API if using App Auth.
+* **`language`**: Set the default server language.
+
+*Note: Player data (UUID links) is stored locally in `link.json`.*
+
+---
+
+## 📜 Commands & Permissions
+
+| Command | Description | Permission |
+| --- | --- | --- |
+| `/2fa <AppKey>` | Link your account to the mobile app. | `mcfactor.use` |
+| `/2fa` | Unlink your current device. | `mcfactor.use` |
+| `/2fa disconnect <player>` | (Admin) Force unlink a specific player. | `mcfactor.admin` |
+| `/2fa help` | Show the help menu. | `mcfactor.use` |
+
+---
+
+## 🤝 License
+* This plugin is open source.
+* You're welcome to use the REST API we host in your own apps (although we're not sure if it will be useful).
+* The companion application is ARR (All rights reserved).
+
+*The companion application source code is not publicly available.*
+
+---
+
+## 📥 Download app
+
+* Android: [Install]()
+* iOS: [Install]()
+
+*Note: The app displays ads.*

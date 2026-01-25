@@ -16,8 +16,13 @@ commands:
     description: Two-factor authentication commands
     aliases: [2f]
     usage: /<command> [appkey|help|disconnect]
+    permission: mcfactor.use
+    permission-message: You do not have permission to use this command.
 
 permissions:
   mcfactor.admin:
     description: Allows admin commands
     default: op
+  mcfactor.use:
+    description: Allows use of 2FA commands
+    default: true
